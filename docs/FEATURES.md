@@ -107,3 +107,209 @@ Formato en [`WORKFLOW.md`](./WORKFLOW.md) §"Formato de ticket". Estados: `backl
   La clave es que **"Re-run jobs" reejecuta el commit al que estaba fijado el run, no el tip de `main`**. Un run cancelado parece algo que hay que reintentar, y reintentarlo es justo lo que rompe producción. `cancel-in-progress: false` quita el motivo para reintentar (los runs se encolan en orden de push, así que el último que publica es el más nuevo) y el step guarda la puerta para el caso manual. El guard solo corre si `github.run_attempt != '1'`: en el intento 1 el commit pusheado es el tip por definición.
   
   Probado en local contra el commit real del incidente: con `65be17f` sale `exit 1`; con el tip actual continúa.
+
+## f-010 — Las imágenes webp no tienen fallback raster real
+
+- Estado: backlog · Prioridad: P3
+- AC:
+  - [ ] `CustomImage` (`components/high-order-components/CustomImage.tsx:28-34`) emite `<source type="image/webp" srcSet={webp}>` + `<img src={jpgFallback}>`, donde `jpgFallback` deriva del webp cambiando la extensión (`.webp`→`.jpg`) con el mismo prefijado de `BASE_PATH`. Hoy el `<source>` y el `<img>` apuntan **ambos** al webp, así que un navegador sin webp no cae a ningún lado.
+  - [ ] Existe un `.jpg` para **cada webp servido vía `CustomImage`** — no solo los ~35 de `data/**`, también los srcs a nivel de componente (p.ej. el default `/manager.webp` en `components/hero.tsx:40`). El set = todo webp que llega a `CustomImage`, hay que enumerar los call sites, no solo `data`.
+  - [ ] Los 2 hermanos que hoy son `.png` (`call-tracking-cover.png`, `next-ecosystem.png`) se regeneran como `.jpg` para que el swap `.webp`→`.jpg` sea uniforme; `seated.jpg` y `smiling.jpg` ya valen tal cual.
+  - [ ] Los jpg de fallback van **comprimidos y a las mismas dimensiones** que su webp (mozjpeg q~80): un navegador sin webp no debe descargar un jpg gigante — el objetivo del audit de rendimiento no se puede deshacer por fallbacks obesos.
+  - [ ] `out/**` inspeccionado: cada `<picture>` lleva `<source type="image/webp">` + `<img src="....jpg">`; con webp se sirve webp, sin webp el jpg.
+  - [ ] `tsc --noEmit` limpio, `npm run lint` 0/0, `npm run build` verde.
+- Notas: **decisión del owner: generar jpg para todos** (cobertura 100%), frente a una prop `fallbackSrc` opcional o cablear solo los 4 pares que ya existen. Situación de partida: de los ~35 webp referenciados en `data/**`, solo 4 tienen raster hermano en disco (`seated.jpg`, `smiling.jpg`, `next-ecosystem.png`, `call-tracking-cover.png`); los otros ~31 no tienen ninguna fuente a la que caer, así que "activar fallback" no es solo tocar `CustomImage`, hay que **generar** el raster. Contexto: webp tiene soporte ~97%+ global (universal desde 2020: Chrome/Edge/Firefox siempre, Safari 14 / iOS 14 en adelante); este ticket es robustez para IE11 y Safari<14, audiencia mínima. Constraint del export estático (`images.unoptimized`): los jpg se copian de `public/` tal cual, sin optimización de Next → de ahí el AC de compresión. Fuera de scope: el `<source>` mobile comentado (`generateMobileRoute`, TODO en `CustomImage.tsx:29-32`) y los `og:image` webp de los metadatos (`app/**`), que van a scrapers sociales y no pasan por `<picture>`. Detectado en el audit de rendimiento de producción (agosto 2026).
+
+## f-011 — Vídeos muertos pesando en el artefacto de producción
+
+- Estado: backlog · Prioridad: P2
+- AC:
+  - [ ] Borrados `public/portfolio-intro.mp4` (71MB) y `public/portfolio-intro_old.webm` (52MB).
+  - [ ] `npm run build` verde; el vídeo intro sigue reproduciéndose (usa `/portfolio-intro.webm`); sitio visualmente idéntico.
+  - [ ] Ningún `out/**` referencia los ficheros borrados.
+- Notas: 0 refs confirmado por grep en `data/ components/ app/`. El intro usa `/portfolio-intro.webm` (`data/aboutMe.personal.data.ts:50`, `data/aboutMe.professional.data.ts:53`; `components/about.tsx:108` alimenta ese webm a un `<source>`). El `.mp4` y el `_old.webm` no los referencia nada ni ningún patrón de fallback los toca. ~123MB fuera del artefacto. Detectado en el audit de rendimiento de producción (agosto 2026): `public/` pesa 518MB, de los que 494MB son vídeo.
+- Pendiente (ticket propio):
+  - Los vídeos **vivos** siguen brutales para lo que son (capturas de pantalla de demo): `e-commerce.webm` 83MB, `demo-better-auth.webm` 56MB, `next-ecosystem.webm` 48MB, `aem-demo.webm` 40MB, `portfolio-intro.webm` 36MB, etc. — cientos de MB entre todos. Re-encode (VP9/AV1, escalado al ancho real de reproducción, CRF~32) los baja 90%+. Además `CustomVideo` (`CustomVideo.tsx:155`) no pone `preload="none"` ni `poster`, así que cada página de proyecto se traga su vídeo entero al hacer scroll (el `IntersectionObserver` a 0.25 lanza `.play()`).
+  - Rasters originales huérfanos (0 refs): `developer.{png,webp}`, `developer2.{png,webp}`, `minimalist-portfolio.png` y `manager.png` — **ojo:** `manager.webp` **sí** se usa (og:image en `app/**` y default de `hero.tsx`), solo sobra el `.png`. Limpiarlos encaja después de f-010, que decide qué rasters se quedan como fallback.
+
+---
+
+# Épica macOS / iOS (f-012 → f-024)
+
+Rediseño total: el portfolio pasa a ser un escritorio macOS (desktop) que se convierte en home screen de iOS (mobile). Referencia: [asierbayon/asierbayonOS](https://github.com/asierbayon/asierbayonOS) (licencia WTFPL, copia permitida), publicado en <https://www.asierbayon.com/>.
+
+Decisiones del owner (noviembre 2026), aplican a todos los tickets de la épica:
+
+- **Port, no reescritura desde cero.** El código de Asier es 100% cliente (el worker de Cloudflare solo hace hosting), así que se porta a `components/os/` y se parte en módulos por app. Su `page.tsx` es un monolito de 7.330 líneas: cada ticket extrae y adapta solo la app que toca.
+- **Contenido de Javi, no de Asier.** Todos los textos personales, proyectos, nombre, redes y CV son de Javi. Excepciones temporales pedidas por el owner: wallpaper, memes, playlist de Spotify y lista de YouTube se copian de Asier (con el nombre de Javi) hasta que haya sustitutos propios.
+- **Logo de Apple en el boot** (decisión del owner: realismo).
+- **Light only** (f-004 se mantiene). Las ventanas siguen el estilo claro de macOS.
+- **Deep links.** `/about`, `/experience`, `/portfolio/[slug]`, etc. siguen existiendo como páginas estáticas con su metadata, y cargan el escritorio con esa ventana abierta.
+- **Idioma EN/DE** vía `useLanguageStore`: System Settings › Language & Region + item visible en la menu bar (🌐 EN/DE). iOS: app Settings.
+- **Mobile = iOS completo:** grid + dock, apps a pantalla completa con zoom desde el icono, home indicator para cerrar, carpetas como overlay iOS.
+- **Coexistencia hasta el cutover.** Hasta f-024 el escritorio vive en `/desktop` con su propio root layout (route group `app/(os)`), aislado del CSS del sitio actual (`app/(site)`). Así cada PR se puede mergear a `main` sin romper producción. f-024 lo pasa a `/`.
+- **Flujo:** desarrollar y abrir PRs encadenadas sin parar, una por ticket, cada una verificada (`tsc`, `lint`, `build`, navegador).
+
+Mapa de contenido actual → OS:
+
+| Contenido actual | macOS | iOS |
+|---|---|---|
+| Hero / intro | Boot screen (logo Apple) → escritorio | Boot → home screen |
+| `portfolio-intro.webm` | `Intro.mov` en el escritorio → reproductor QuickTime | Icono en home |
+| Portfolio (proyectos) | Carpeta `Projects` (Finder) → ventana por proyecto | Overlay de carpeta → app |
+| Experience | Notes, una nota por trabajo | Notes |
+| About personal / profesional | Notes, secciones "Personal" y "Professional" | Notes |
+| Hobbies | Nota en Notes (snowboard en Flumserberg, fuerza, lectura, vídeo, podcast; fotos y links a YouTube) | Notes |
+| Galería de fotos | Photos | Photos |
+| Certificaciones | Carpeta `My certifications` → Preview con iframe de Drive (`/preview`) + botón "Open in Drive" | Igual |
+| CV | `CV.pdf` en el escritorio → Preview con pdf.js + Download | Igual |
+| Contact | Mail: compose prellenado → `mailto:`, CV adjunto | Mail |
+| Metrics | Activity Monitor | Igual |
+| Architectures | Freeform | Igual |
+| Tech carousel | About This Mac | Settings › About |
+| GitHub activity | Terminal (`git log`, `whoami`, `ls projects`, `open cv`, `lang de`) | — |
+| LinkedIn / GitHub / YouTube | Un icono por red | Iconos en home |
+| YouTube | App con lista curada + vídeos demo de proyectos como si fueran uploads | Igual |
+| Extras de Asier | Spotify, Weather (España), Paint/editor de imagen, ChatGPT, Instagram, Facebook, Control Center, Trash, matrix rain, console art | Igual |
+| Memes | Imágenes en el escritorio | Álbum en Photos |
+| Analytics | Mismos helpers de `lib/analytics.ts`, más `window_open` | Igual |
+
+Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor, Settings, LinkedIn, GitHub, Trash.
+
+## f-012 — Tickets de la épica macOS/iOS
+
+- Estado: review · Prioridad: P1
+- AC:
+  - [x] Épica y tickets f-013..f-024 escritos en este fichero con AC binarios
+  - [x] Decisiones del owner registradas arriba para no perderlas entre sesiones
+- Notas: solo documentación. Incluye también f-010 y f-011, que estaban sin commitear en el worktree principal.
+
+## f-013 — Shell del OS: boot, menu bar, ventanas, dock, home iOS
+
+- Estado: backlog · Prioridad: P1
+- Depende de: f-012
+- AC:
+  - [ ] Route groups: el sitio actual se mueve a `app/(site)/` sin cambios visibles; el escritorio vive en `app/(os)/desktop/` con root layout y CSS propios (`components/os/os.css`), sin contaminar al sitio actual
+  - [ ] Boot screen con logo Apple y barra de progreso; se salta en visitas repetidas dentro de la misma sesión (`sessionStorage`)
+  - [ ] Menu bar: logo Apple, nombre de la app activa, reloj, iconos de estado, item visible de idioma (🌐 EN/DE) que cambia `useLanguageStore`
+  - [ ] Wallpaper de Asier (temporal)
+  - [ ] Window manager portado: arrastrar, foco/z-index, cerrar/minimizar/maximizar con semáforos, minimizar al dock
+  - [ ] Dock con magnificación, indicador de app abierta, orden del épico
+  - [ ] Iconos de escritorio (seleccionar, doble clic abre)
+  - [ ] iOS (<768px): home screen con grid, dock de 4, apps a pantalla completa, home indicator cierra
+  - [ ] Registro de apps tipado (`components/os/apps.ts`): cada ticket posterior solo añade una entrada + su componente
+  - [ ] `tsc --noEmit` limpio, `npm run lint` 0 errores, `npm run build` verde, sitio actual idéntico en `/`
+- Notas: se porta `page.tsx`, `globals.css` y `startup-screen.*` de Asier, partidos en módulos. Las apps aún no portadas abren una ventana vacía con su título.
+
+## f-014 — Finder + carpeta Projects + deep links de proyecto
+
+- Estado: backlog · Prioridad: P1
+- Depende de: f-013
+- AC:
+  - [ ] Finder portado (sidebar Favorites/iCloud, vista de iconos)
+  - [ ] Carpeta `Projects` en el escritorio con un icono por entrada de `data/projects.data.ts` (mismo orden)
+  - [ ] Abrir un proyecto muestra una ventana con su contenido (título, descripción, tecnologías, imágenes, vídeo vía `CustomVideo`) en EN/DE
+  - [ ] `trackProjectClick` se dispara al abrir un proyecto
+  - [ ] `/desktop?open=project:<slug>` abre el escritorio con ese proyecto abierto (mecanismo de deep link reutilizado por f-024)
+  - [ ] iOS: carpeta como overlay; proyecto a pantalla completa
+  - [ ] Gates de f-013
+
+## f-015 — Notes: About, Experience, Hobbies
+
+- Estado: backlog · Prioridad: P1
+- Depende de: f-013
+- AC:
+  - [ ] Notes portado (sidebar de carpetas, lista, cuerpo)
+  - [ ] Notas: "About — Professional", "About — Personal" (de `data/aboutMe.*`), una nota por trabajo de `data/experiences.data.ts` con logros, "Hobbies" (snowboard en Flumserberg, fuerza, lectura, vídeo, podcast; fotos y links a YouTube)
+  - [ ] Todo el texto cambia con el idioma (EN/DE)
+  - [ ] Gates de f-013
+
+## f-016 — Preview: CV.pdf, My certifications, memes
+
+- Estado: backlog · Prioridad: P1
+- Depende de: f-013
+- AC:
+  - [ ] `CV.pdf` en el escritorio abre Preview con el PDF renderizado (pdf.js) y botón Download (`trackCvDownload`)
+  - [ ] Carpeta `My certifications` en el escritorio; cada certificación de `data/certifications.data.ts` abre Preview con iframe de Drive (`/file/d/ID/preview`) y botón "Open in Drive"
+  - [ ] Memes de Asier en el escritorio, abren en Preview
+  - [ ] Funciona en iOS Safari
+  - [ ] Gates de f-013
+
+## f-017 — QuickTime (Intro.mov) + Photos
+
+- Estado: backlog · Prioridad: P2
+- Depende de: f-013
+- AC:
+  - [ ] `Intro.mov` en el escritorio reproduce `portfolio-intro.webm` en un reproductor estilo QuickTime (eventos de `trackVideoEvent`)
+  - [ ] Photos portado con la galería de Javi (`CustomPhotoGallery` / datos de about) + álbum Memes
+  - [ ] Gates de f-013
+
+## f-018 — Mail (contacto) + apps de redes
+
+- Estado: backlog · Prioridad: P2
+- Depende de: f-013
+- AC:
+  - [ ] Mail portado: compose con To de Javi, asunto/cuerpo editables, Send abre `mailto:`; CV adjunto descargable
+  - [ ] Iconos LinkedIn y GitHub abren el perfil en pestaña nueva con `trackExternalClick`
+  - [ ] Gates de f-013
+
+## f-019 — YouTube + Spotify
+
+- Estado: backlog · Prioridad: P2
+- Depende de: f-013
+- AC:
+  - [ ] YouTube portado con la lista curada de Asier (temporal) + los vídeos demo de proyectos en `public/*.webm` como si fueran uploads del canal de Javi; enlace al canal `@javi-tricker`
+  - [ ] Spotify portado con la playlist de Asier (temporal), nombre de Javi
+  - [ ] Solo una fuente de audio a la vez (lógica de `media.ts`)
+  - [ ] Gates de f-013
+
+## f-020 — Terminal + GitHub activity
+
+- Estado: backlog · Prioridad: P2
+- Depende de: f-013
+- AC:
+  - [ ] Terminal con prompt `javi@macbook ~ %`, comandos `help`, `whoami`, `ls`, `ls projects`, `open <app|proyecto>`, `open cv`, `lang en|de`, `git log` (actividad de GitHub de `GitHubActivity`), `clear`, easter eggs (`sudo`, `matrix`)
+  - [ ] Gates de f-013
+
+## f-021 — Activity Monitor, Freeform, About This Mac
+
+- Estado: backlog · Prioridad: P2
+- Depende de: f-013
+- AC:
+  - [ ] Activity Monitor muestra `METRICS_DATA` (scores, facts, "Try it yourself") con estilo de gráficas de Activity Monitor
+  - [ ] Freeform muestra `architectures.data.ts` en un tablero
+  - [ ] About This Mac (menú Apple) lista el stack de `technologies.data.ts`
+  - [ ] Gates de f-013
+
+## f-022 — System Settings + Control Center
+
+- Estado: backlog · Prioridad: P2
+- Depende de: f-013
+- AC:
+  - [ ] System Settings: Language & Region (EN/DE, etiquetado claramente como cambio de idioma), Wallpaper, About
+  - [ ] Control Center portado (Wi-Fi, Bluetooth, idioma, volumen)
+  - [ ] iOS: app Settings en home
+  - [ ] Gates de f-013
+
+## f-023 — Extras de Asier: Weather, Paint, ChatGPT, Instagram, Facebook, Trash
+
+- Estado: backlog · Prioridad: P3
+- Depende de: f-013
+- AC:
+  - [ ] Weather portado con ubicación en España (widget + app)
+  - [ ] Editor tipo Paint portado (lápiz, rotulador, texto)
+  - [ ] ChatGPT portado (respuestas por intents locales, sin backend), adaptado a Javi
+  - [ ] Instagram y Facebook portados con contenido placeholder de Javi (sin fotos ni datos de Asier)
+  - [ ] Trash, matrix rain, console art
+  - [ ] Gates de f-013
+
+## f-024 — Cutover: el escritorio pasa a `/`
+
+- Estado: backlog · Prioridad: P1
+- Depende de: f-014..f-023
+- AC:
+  - [ ] `/` sirve el escritorio; `/about`, `/experience`, `/metrics`, `/contact`, `/portfolio`, `/portfolio/[slug]` sirven el escritorio con la ventana correspondiente abierta y mantienen su metadata
+  - [ ] Sitemap incluye las mismas URLs; `out/` inspeccionado
+  - [ ] Componentes del sitio antiguo sin uso eliminados; `app/(site)` desaparece
+  - [ ] GA sigue enchufado
+  - [ ] Gates de f-013 + review `impeccable` en EN y DE, desktop y mobile
