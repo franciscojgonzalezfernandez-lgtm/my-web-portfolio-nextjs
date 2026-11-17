@@ -1,0 +1,56 @@
+.startup-content {
+  display: contents;
+}
+
+.startup-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: #000;
+  color: #fff;
+  opacity: 1;
+  transition: opacity 280ms ease;
+  touch-action: none;
+  user-select: none;
+}
+
+.startup-screen[data-finished="true"] {
+  opacity: 0;
+}
+
+.startup-logo {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 88px;
+  height: 88px;
+  transform: translate(-50%, -50%);
+}
+
+.startup-progress {
+  position: absolute;
+  top: calc(45% + 96px);
+  left: 50%;
+  width: 160px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #333;
+  transform: translateX(-50%);
+}
+
+.startup-progress > div {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: inherit;
+  transform-origin: left;
+  transition: transform 220ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startup-screen,
+  .startup-progress > div {
+    transition: none;
+  }
+}
