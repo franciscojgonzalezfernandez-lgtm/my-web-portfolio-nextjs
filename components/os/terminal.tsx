@@ -148,7 +148,7 @@ const GitLog = () => {
 };
 
 const Neofetch = () => {
-  const years = new Date().getFullYear() - 2017;
+  const years = new Date().getFullYear() - 2018;
   const rows: Array<[string, string]> = [
     ["OS", "JaviOS (macOS-style) on Next.js"],
     ["Host", "javier-gonzalez-portfolio.com"],
