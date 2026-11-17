@@ -291,13 +291,14 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-022 — System Settings + Control Center
 
-- Estado: backlog · Prioridad: P2
+- Estado: review · Prioridad: P2
 - Depende de: f-013
 - AC:
-  - [ ] System Settings: Language & Region (EN/DE, etiquetado claramente como cambio de idioma), Wallpaper, About
-  - [ ] Control Center portado (Wi-Fi, Bluetooth, idioma, volumen)
-  - [ ] iOS: app Settings en home
-  - [ ] Gates de f-013
+  - [x] System Settings: Language & Region (EN/DE, etiquetado claramente como cambio de idioma), Wallpaper, About
+  - [x] Control Center portado (Wi-Fi, Bluetooth, idioma, volumen)
+  - [x] iOS: app Settings en home
+  - [x] Gates de f-013
+- Notas: `components/os/settings-app.tsx` (Language & Region, Wallpaper con 3 opciones —la de Asier + 2 degradados CSS propios—, About reutiliza About This Mac). El wallpaper elegido se guarda en `localStorage` (`javi-os-wallpaper`) y se aplica vía la variable CSS `--wallpaper`. Control Center: la tile de idioma sustituye a Stage Manager (desktop) y a Screen Mirroring (iOS). Cuando el owner suba su foto con su novia, basta con añadirla a `WALLPAPERS` y hacerla `default`.
 
 ## f-023 — Extras de Asier: Weather, Paint, ChatGPT, Instagram, Facebook, Trash
 

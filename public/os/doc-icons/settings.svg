@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="64" y1="0" x2="64" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d9dade"/>
+      <stop offset="1" stop-color="#8e9096"/>
+    </linearGradient>
+    <linearGradient id="gear" x1="64" y1="20" x2="64" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5d6066"/>
+      <stop offset="1" stop-color="#2f3135"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28.5" fill="url(#bg)"/>
+  <rect x="0.75" y="0.75" width="126.5" height="126.5" rx="27.8" stroke="#000" stroke-opacity="0.12"/>
+  <g transform="translate(64 64)">
+    <g fill="url(#gear)">
+      <circle r="34"/>
+      <g id="t"><rect x="-6" y="-44" width="12" height="16" rx="3"/></g>
+      <use href="#t" transform="rotate(30)"/><use href="#t" transform="rotate(60)"/><use href="#t" transform="rotate(90)"/>
+      <use href="#t" transform="rotate(120)"/><use href="#t" transform="rotate(150)"/><use href="#t" transform="rotate(180)"/>
+      <use href="#t" transform="rotate(210)"/><use href="#t" transform="rotate(240)"/><use href="#t" transform="rotate(270)"/>
+      <use href="#t" transform="rotate(300)"/><use href="#t" transform="rotate(330)"/>
+    </g>
+    <circle r="22" fill="#c9cbd0"/>
+    <circle r="10" fill="#5d6066"/>
+  </g>
+</svg>

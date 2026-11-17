@@ -786,3 +786,227 @@
   outline: none;
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* f-022: System Settings. */
+.settings-app {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  background: #fff;
+  color: #1d1d1f;
+  font-size: 13px;
+}
+.settings-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 10px;
+  border-right: 1px solid #e5e5e5;
+  background: #f2f2f4;
+}
+.settings-search {
+  padding: 5px 10px;
+  border-radius: 7px;
+  background: #e3e3e7;
+  color: #8e8e93;
+}
+.settings-account,
+.settings-sidebar nav button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.settings-account img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.settings-account span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.settings-account small {
+  color: #8e8e93;
+  font-size: 11px;
+}
+.settings-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.settings-sidebar nav button.active {
+  background: #0a84ff;
+  color: #fff;
+}
+.settings-sidebar nav button:not(.active):hover,
+.settings-account:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+.settings-icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+}
+.settings-pane {
+  min-height: 0;
+  overflow: auto;
+  padding: 22px 28px 32px;
+}
+.settings-pane h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.settings-lead {
+  margin: 0 0 18px;
+  color: #6e6e73;
+  line-height: 1.5;
+}
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f5f5f7;
+}
+.settings-group small {
+  padding: 8px 14px 4px;
+  color: #8e8e93;
+  font-size: 11px;
+  font-weight: 600;
+}
+.settings-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border: 0;
+  border-top: 1px solid #e5e5ea;
+  background: transparent;
+  color: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.settings-option:hover {
+  background: #ececf0;
+}
+.settings-code {
+  min-width: 30px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: #1d1d1f;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+.settings-option-label {
+  flex: 1;
+}
+.settings-check {
+  color: #0a84ff;
+  font-size: 12px;
+  font-weight: 600;
+}
+.settings-wallpapers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+.settings-wallpapers button {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.settings-wallpapers button span {
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+.settings-wallpapers button[aria-checked="true"] span {
+  box-shadow: 0 0 0 3px #0a84ff;
+}
+.settings-pane .about-mac {
+  min-height: auto;
+  border-radius: 12px;
+}
+.settings-back {
+  display: none;
+}
+@media (min-width: 701px) {
+  .window-shell:has(.settings-app) {
+    width: min(760px, calc(100vw - 80px));
+    height: min(560px, 84vh);
+  }
+}
+@media (max-width: 700px) {
+  .settings-app {
+    grid-template-columns: 1fr;
+    padding-top: max(47px, env(safe-area-inset-top));
+    background: #f2f2f7;
+  }
+  .settings-sidebar {
+    border: 0;
+    background: transparent;
+    font-size: 16px;
+  }
+  .settings-sidebar nav,
+  .settings-account {
+    border-radius: 12px;
+    background: #fff;
+  }
+  .settings-sidebar nav button.active {
+    background: transparent;
+    color: inherit;
+  }
+  .settings-pane {
+    display: none;
+    padding: 0 16px 32px;
+  }
+  .settings-app[data-mobile-pane="true"] .settings-sidebar {
+    display: none;
+  }
+  .settings-app[data-mobile-pane="true"] .settings-pane {
+    display: block;
+  }
+  .settings-back {
+    display: block;
+    margin: 4px 0 12px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #0a84ff;
+    font-size: 16px;
+  }
+}
+
+/* f-022: Control Center language tile. */
+.cc-language-value {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
