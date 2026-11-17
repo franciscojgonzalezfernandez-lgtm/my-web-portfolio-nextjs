@@ -193,16 +193,29 @@ type OpenWindow = {
 
 type FolderId = "secret" | "projects" | "certifications";
 
-type DeepLinkTarget = { kind: "project"; slug: string } | { kind: "folder"; folder: "projects" };
+// A window to open on load: from a route (/portfolio/<slug>, /about, …) via the
+// `open` prop, or from ?open=<kind>:<value> on any URL.
+export type DeepLinkTarget =
+  | { kind: "project"; slug: string }
+  | { kind: "folder"; folder: "projects" | "certifications" }
+  | { kind: "notes"; noteId: string }
+  | { kind: "app"; app: "mail" | "activity-monitor" | "freeform" | "photos" };
+
+const DEEP_LINK_APPS = ["mail", "activity-monitor", "freeform", "photos"] as const;
 
 export const readDeepLink = (search: string): DeepLinkTarget | null => {
   const open = new URLSearchParams(search).get("open");
   if (!open) return null;
-  const [kind, value] = open.split(":");
+  const [kind, value = ""] = open.split(":");
   if (kind === "project" && portfolioProjects.some((project) => project.slug === value)) {
     return { kind: "project", slug: value };
   }
-  if (kind === "folder" && value === "projects") return { kind: "folder", folder: "projects" };
+  if (kind === "folder" && (value === "projects" || value === "certifications")) {
+    return { kind: "folder", folder: value };
+  }
+  if (kind === "notes" && value) return { kind: "notes", noteId: value };
+  const app = DEEP_LINK_APPS.find((id) => id === value);
+  if (kind === "app" && app) return { kind: "app", app };
   return null;
 };
 
@@ -6684,7 +6697,7 @@ const useTypingViewport = () => {
   }, []);
 };
 
-export default function Home() {
+export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
   usePreventBrowserZoom();
   useTypingViewport();
   const [openWindows, setOpenWindows] = useState<OpenWindow[]>([]);
@@ -6913,10 +6926,12 @@ export default function Home() {
   useEffect(() => {
     if (handledDeepLink.current) return;
     handledDeepLink.current = true;
-    const target = readDeepLink(window.location.search);
+    const target = open ?? readDeepLink(window.location.search);
     if (!target) return;
     if (target.kind === "project") openProject(target.slug);
-    else addWindow({ kind: "folder", folder: target.folder });
+    else if (target.kind === "folder") addWindow({ kind: "folder", folder: target.folder });
+    else if (target.kind === "notes") openNotes({ noteId: target.noteId });
+    else addWindow({ kind: "app", app: target.app });
   });
   const openPreview = (doc: PreviewDoc) => {
     addWindow({ kind: "preview", doc });

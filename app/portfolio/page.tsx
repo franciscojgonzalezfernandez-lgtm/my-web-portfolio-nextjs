@@ -1,5 +1,4 @@
-import { Portfolio } from "@/components/portfolio";
-import { projects } from "@/data/projects.data";
+import Desktop from "@/components/os/desktop";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -38,12 +37,7 @@ export const metadata: Metadata = {
   ],
 };
 
+// The portfolio is the Projects folder in Finder.
 export default function PortfolioPage() {
-  return (
-    <div className="min-h-screen">
-      <main className="pt-20">
-        <Portfolio projects={projects} />
-      </main>
-    </div>
-  );
+  return <Desktop open={{ kind: "folder", folder: "projects" }} />;
 }

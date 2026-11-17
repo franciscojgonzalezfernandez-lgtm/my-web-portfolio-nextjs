@@ -315,11 +315,24 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-024 — Cutover: el escritorio pasa a `/`
 
-- Estado: backlog · Prioridad: P1
+- Estado: review · Prioridad: P1
 - Depende de: f-014..f-023
 - AC:
-  - [ ] `/` sirve el escritorio; `/about`, `/experience`, `/metrics`, `/contact`, `/portfolio`, `/portfolio/[slug]` sirven el escritorio con la ventana correspondiente abierta y mantienen su metadata
-  - [ ] Sitemap incluye las mismas URLs; `out/` inspeccionado
-  - [ ] Componentes del sitio antiguo sin uso eliminados; `app/(site)` desaparece
-  - [ ] GA sigue enchufado
-  - [ ] Gates de f-013 + review `impeccable` en EN y DE, desktop y mobile
+  - [x] `/` sirve el escritorio; `/about`, `/experience`, `/metrics`, `/contact`, `/portfolio`, `/portfolio/[slug]` sirven el escritorio con la ventana correspondiente abierta y mantienen su metadata
+  - [x] Sitemap incluye las mismas URLs; `out/` inspeccionado
+  - [x] Componentes del sitio antiguo sin uso eliminados; `app/(site)` desaparece
+  - [x] GA sigue enchufado
+  - [ ] Gates de f-013 + review `impeccable` en EN y DE, desktop y mobile (gates sí: tsc, lint, build y navegador; la review `impeccable` queda pendiente para el owner antes de mergear)
+- Notas: el root layout es el del OS (metadata SEO del sitio antiguo, sin `noindex`). Cada ruta antigua renderiza `<Desktop open={…} />` con su metadata: `/about` → nota Professional, `/experience` → primera nota de Experience, `/metrics` → Activity Monitor, `/contact` → Mail, `/portfolio` → carpeta Projects, `/portfolio/<slug>` → ventana del proyecto. También `?open=<kind>:<value>` en cualquier URL. `not-found` muestra el escritorio. Se corrige el canonical de `/experience`, que apuntaba a `/metrics`. Borrados los componentes, datos e i18n del sitio antiguo sin uso (`lib/intl.ts`, `i18n/`, header/footer/hero/…). `out/` revisado: 9 proyectos, `sitemap.xml` con 15 URLs, canonicals y GA presentes.
+
+## f-025 — Actualizar CLAUDE.md y WORKFLOW.md a la arquitectura OS
+
+- Estado: backlog · Prioridad: P2
+- Depende de: f-024
+- AC:
+  - [ ] `CLAUDE.md` describe `components/os/` (desktop.tsx monolito portado + módulos por app), el registro `apps`, las window kinds y los deep links (`open` prop / `?open=`)
+  - [ ] Sección i18n: desaparece el sistema 2 (`lib/intl.ts`, `i18n/`), queda solo `useLanguageStore`, con la guarda de hidratación (`useSyncExternalStore`) para leerlo en render
+  - [ ] Documentado el override de ESLint para `desktop.tsx`/`youtube.tsx` portados y por qué
+  - [ ] Notas de estilo: `os.css` (de Asier) + `project-window.css` (propio); los tokens shadcn/`globals.css` ya no existen; el wallpaper va por `--wallpaper`
+  - [ ] Revisar si `components/ui/` (shadcn) y sus dependencias siguen haciendo falta; si no, ticket aparte para quitarlas
+- Notas: convenciones = ticket propio (regla de CLAUDE.md), por eso no va dentro de f-024.

@@ -1,7 +1,7 @@
+import Desktop from "@/components/os/desktop";
 import { notFound } from "next/navigation";
 import { projects } from "@/data/projects.data";
 
-import { ProjectContent } from "@/components/project-content";
 import { Metadata } from "next";
 
 export function generateStaticParams() {
@@ -64,17 +64,15 @@ export async function generateMetadata({
   };
 }
 
+// Each project opens in its own window on the desktop.
 export default async function ProjectDetailPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const resolvedParams = await params;
-  const project = projects.find((p) => p.slug === resolvedParams.slug);
-
-  if (!project) {
+  const { slug } = await params;
+  if (!projects.some((project) => project.slug === slug)) {
     notFound();
   }
-
-  return <ProjectContent project={project} />;
+  return <Desktop open={{ kind: "project", slug }} />;
 }

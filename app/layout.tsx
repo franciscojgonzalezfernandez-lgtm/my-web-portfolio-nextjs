@@ -1,12 +1,23 @@
-import type React from "react";
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { AnalyticsWrapper } from "@/components/high-order-components/Analytics-wrapper";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { getMessages } from "@/lib/intl";
-import { IntlProviderClient } from "@/components/IntlProviderClient";
+import ConsoleArt from "@/components/os/console-art";
+import "@/components/os/os.css";
+import "@/components/os/startup-screen.css";
+import "@/components/os/project-window.css";
+
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  interactiveWidget: "overlays-content",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://javier-gonzalez-portfolio.com"),
@@ -47,22 +58,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const locale = "en"; // with static export we'll default to English; language switching can be added client-side
-  const messages = getMessages(locale);
+}: Readonly<{ children: React.ReactNode }>) {
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
-
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased`}>
-        <IntlProviderClient locale={locale} messages={messages}>
-          <Header />
-          {children}
-          {gaId ? <AnalyticsWrapper /> : null}
-          <Footer />
-        </IntlProviderClient>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable}`}
+        suppressHydrationWarning
+      >
+        <ConsoleArt />
+        {children}
+        {gaId ? <AnalyticsWrapper /> : null}
       </body>
       {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
     </html>
