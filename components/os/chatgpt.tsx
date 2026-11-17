@@ -50,7 +50,7 @@ const MATRIX_SCRIPT: readonly ScriptLine[] = [
   { text: "Knock, knock, Neo.", reveal: "instant", holdMs: 3200 },
 ];
 
-const GREETING_REPLY = "Hi.";
+const GREETING_REPLY = "Hi! I'm Javi's assistant. Open Notes to meet him.";
 const AGENT_REPLY = "Yes, I am.";
 
 // Sit on "Thinking" before a short reply or the matrix sequence.

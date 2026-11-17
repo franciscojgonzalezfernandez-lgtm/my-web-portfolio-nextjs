@@ -46,7 +46,7 @@ const DAY_COUNT = 10;
 const DAY_MINUTES = 24 * 60;
 const PRECIPITATION_THRESHOLD = 20;
 const SWIPE_THRESHOLD = 56;
-const FALLBACK_PLACE_ID = "zurich";
+const FALLBACK_PLACE_ID = "madrid";
 const UV_GRADIENT = "linear-gradient(90deg, #30d158, #ffd60a, #ff9f0a, #ff453a, #bf5af2)";
 const PRESSURE_GRADIENT = "linear-gradient(90deg, rgba(255,255,255,0.25), rgba(255,255,255,0.6))";
 const PRESSURE_RANGE = { min: 970, max: 1050 };
@@ -66,11 +66,11 @@ type Coordinates = { latitude: number; longitude: number };
 type Place = Coordinates & { id: string; name: string };
 
 const SAVED_PLACES: Place[] = [
+  { id: "madrid", name: "Madrid", latitude: 40.4168, longitude: -3.7038 },
+  { id: "granada", name: "Granada", latitude: 37.1773, longitude: -3.5986 },
+  { id: "sierra-nevada", name: "Sierra Nevada", latitude: 37.0956, longitude: -3.3986 },
+  { id: "flumserberg", name: "Flumserberg", latitude: 47.0906, longitude: 9.2869 },
   { id: "zurich", name: "Zurich", latitude: 47.3769, longitude: 8.5417 },
-  { id: "davos", name: "Davos", latitude: 46.8027, longitude: 9.836 },
-  { id: "arosa", name: "Arosa", latitude: 46.7784, longitude: 9.6788 },
-  { id: "laax", name: "Laax", latitude: 46.8067, longitude: 9.2583 },
-  { id: "bilbao", name: "Bilbao", latitude: 43.263, longitude: -2.935 },
 ];
 
 if (!SAVED_PLACES.some((place) => place.id === FALLBACK_PLACE_ID)) {

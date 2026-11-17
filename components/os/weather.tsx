@@ -2,12 +2,12 @@
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
-const ZURICH_NAME = "Zurich";
+const ZURICH_NAME = "Madrid";
 const HOUR_COUNT = 6;
 const MOBILE_HOUR_COUNT = 4;
 const REFRESH_MS = 10 * 60 * 1000;
 const FORECAST_URL =
-  "https://api.open-meteo.com/v1/forecast?latitude=47.3769&longitude=8.5417&current=temperature_2m,weather_code,is_day&hourly=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FZurich&forecast_days=2";
+  "https://api.open-meteo.com/v1/forecast?latitude=40.4168&longitude=-3.7038&current=temperature_2m,weather_code,is_day&hourly=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FMadrid&forecast_days=2";
 
 export type Sky =
   | "clear"
