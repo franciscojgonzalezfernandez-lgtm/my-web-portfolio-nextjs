@@ -62,13 +62,19 @@ import {
   type YouTubeSession,
 } from "./media";
 import { projects as portfolioProjects } from "@/data/projects.data";
-import { trackProjectClick } from "@/lib/analytics";
+import {
+  trackCvDownload,
+  trackEvent,
+  trackExternalClick,
+  trackProjectClick,
+} from "@/lib/analytics";
 import ProjectDocument from "./project-window";
 import MoviePlayer, { INTRO_MOVIE } from "./movie-window";
 import PreviewDocument, {
   certificateDocs,
   certificateLabel,
   CV_LABEL,
+  CV_PATH,
   findCertificate,
   type PreviewDoc,
 } from "./preview-document";
@@ -1470,34 +1476,79 @@ const readMailField = (value: FormDataEntryValue | null) => {
   return value;
 };
 
+const MAIL_LABELS = {
+  english: {
+    to: "To:",
+    subject: "Subject:",
+    subjectDefault: "Job opportunity",
+    greeting: "Hello Javi,",
+    send: "Send",
+    attachment: "Attachment",
+    attachmentHint: "Download my CV",
+  },
+  german: {
+    to: "An:",
+    subject: "Betreff:",
+    subjectDefault: "Jobangebot",
+    greeting: "Hallo Javi,",
+    send: "Senden",
+    attachment: "Anhang",
+    attachmentHint: "Meinen Lebenslauf herunterladen",
+  },
+} as const;
+
+// Contact form. No backend: Send hands the draft to the visitor's mail client.
 const MailComposeForm = () => {
+  const language = useLanguageStore((state) => state.language);
+  const labels = MAIL_LABELS[language];
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const subject = readMailField(data.get("subject"));
+    const subject = readMailField(data.get("subject")) || labels.subjectDefault;
     const message = readMailField(data.get("message"));
     const mailto =
       `mailto:${CONTACT_EMAIL}` +
       `?subject=${encodeURIComponent(subject)}` +
       `&body=${encodeURIComponent(message)}`;
+    trackEvent("contact_email", { language });
     window.location.href = mailto;
   };
 
   return (
     <form className="mail-app" onSubmit={handleSubmit}>
       <label>
-        To: <span>Javi &lt;{CONTACT_EMAIL}&gt;</span>
+        {labels.to} <span>Javi &lt;{CONTACT_EMAIL}&gt;</span>
       </label>
       <label>
-        Subject:{" "}
+        {labels.subject}{" "}
         <input
           name="subject"
-          aria-label="Subject"
-          placeholder="Project enquiry"
+          aria-label={labels.subject}
+          placeholder={labels.subjectDefault}
         />
       </label>
-      <textarea name="message" aria-label="Message" placeholder="Hello Javi," />
-      <button type="submit">Send</button>
+      <textarea
+        key={language}
+        name="message"
+        aria-label="Message"
+        defaultValue={`${labels.greeting}\n\n`}
+      />
+      <div className="mail-footer">
+        <a
+          className="mail-attachment"
+          href={CV_PATH}
+          download="CV-Javi.pdf"
+          title={labels.attachmentHint}
+          onClick={() => trackCvDownload(language)}
+        >
+          <img src={PDF_ICON} alt="" />
+          <span>
+            <b>CV-Javi.pdf</b>
+            <small>{labels.attachment}</small>
+          </span>
+        </a>
+        <button type="submit">{labels.send}</button>
+      </div>
     </form>
   );
 };
@@ -6788,7 +6839,10 @@ export default function Home() {
     }));
   };
   const openApp = (app: DockApp) => {
-    if ("href" in app) return;
+    if ("href" in app) {
+      trackExternalClick(app.name, "desktop");
+      return;
+    }
     setSelected(app.id);
     if (app.id === "notes") {
       openNotes({ noteId: DEFAULT_NOTE_ID });
