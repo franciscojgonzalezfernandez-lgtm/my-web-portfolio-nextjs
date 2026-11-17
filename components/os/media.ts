@@ -1,8 +1,14 @@
+import { projects } from "@/data/projects.data";
+
 export type NowPlayingTrack = {
   videoId: string;
   title: string;
   artist: string;
   cover: string;
+  // Self-hosted "uploads" (project demos in public/) play from this file
+  // instead of the YouTube iframe, and show this frame as their thumbnail.
+  localSrc?: string;
+  thumbnail?: string;
 };
 
 export const YOUTUBE_ORIGIN = "https://www.youtube.com";
@@ -229,11 +235,52 @@ const tinyDeskPlaylist: YouTubePlaylist = {
   ],
 };
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const withBasePath = (src: string) => `${BASE_PATH}${src.startsWith("/") ? src : `/${src}`}`;
+export const JAVI_CHANNEL = "Javi";
+export const JAVI_CHANNEL_URL = "https://www.youtube.com/@javi-tricker";
+const JAVI_AVATAR = withBasePath("/smiling.webp");
+
+export const isLocalVideo = (video: NowPlayingTrack) => Boolean(video.localSrc);
+
+// Javi's "uploads": the intro plus every project demo video shipped in public/.
+const javiIntro: NowPlayingTrack = {
+  videoId: "local:intro",
+  title: "8 years, 2 languages — engineering + business",
+  artist: JAVI_CHANNEL,
+  cover: JAVI_AVATAR,
+  localSrc: withBasePath("/portfolio-intro.webm"),
+  thumbnail: withBasePath("/intro-cover.webp"),
+};
+
+const javiProjectDemos: YouTubePlaylist = {
+  id: "javi-project-demos",
+  title: "Project demos",
+  channel: JAVI_CHANNEL,
+  cover: JAVI_AVATAR,
+  videos: projects.flatMap((project) =>
+    project.videoUrl
+      ? [
+          {
+            videoId: `local:${project.slug}`,
+            title: `${project.title} — demo`,
+            artist: JAVI_CHANNEL,
+            cover: JAVI_AVATAR,
+            localSrc: withBasePath(project.videoUrl),
+            thumbnail: withBasePath(project.images[0] ?? "/intro-cover.webp"),
+          },
+        ]
+      : [],
+  ),
+};
+
 export type YouTubeFeedItem =
   | { kind: "video"; video: NowPlayingTrack }
   | { kind: "playlist"; playlist: YouTubePlaylist };
 
 export const youtubeFeed: readonly YouTubeFeedItem[] = [
+  { kind: "video", video: javiIntro },
+  { kind: "playlist", playlist: javiProjectDemos },
   { kind: "video", video: nothingExceptEverything },
   { kind: "video", video: nobodyLikesMilhouse },
   { kind: "playlist", playlist: tinyDeskPlaylist },
@@ -386,7 +433,7 @@ const assertYouTubeIds = (ids: readonly string[], label: string) => {
   const seen = new Set<string>();
   if (ids.length === 0) throw new Error(`${label} is empty`);
   ids.forEach((id) => {
-    if (!/^[A-Za-z0-9_-]{11}$/.test(id)) {
+    if (!id.startsWith("local:") && !/^[A-Za-z0-9_-]{11}$/.test(id)) {
       throw new Error(`${label} id is not a YouTube id: ${id}`);
     }
     if (seen.has(id)) throw new Error(`Duplicate ${label} id: ${id}`);

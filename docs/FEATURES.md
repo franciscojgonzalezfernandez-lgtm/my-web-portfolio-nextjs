@@ -260,13 +260,14 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-019 — YouTube + Spotify
 
-- Estado: backlog · Prioridad: P2
+- Estado: review · Prioridad: P2
 - Depende de: f-013
 - AC:
-  - [ ] YouTube portado con la lista curada de Asier (temporal) + los vídeos demo de proyectos en `public/*.webm` como si fueran uploads del canal de Javi; enlace al canal `@javi-tricker`
-  - [ ] Spotify portado con la playlist de Asier (temporal), nombre de Javi
-  - [ ] Solo una fuente de audio a la vez (lógica de `media.ts`)
-  - [ ] Gates de f-013
+  - [x] YouTube portado con la lista curada de Asier (temporal) + los vídeos demo de proyectos en `public/*.webm` como si fueran uploads del canal de Javi; enlace al canal `@javi-tricker`
+  - [x] Spotify portado con la playlist de Asier (temporal), nombre de Javi
+  - [x] Solo una fuente de audio a la vez (lógica de `media.ts`)
+  - [x] Gates de f-013
+- Notas: los "uploads" de Javi (intro + playlist "Project demos" con cada `videoUrl` de `data/projects`) van primero en el feed y se reproducen con `CustomVideo` (analytics de vídeo incluidos) en vez del iframe; ids `local:<slug>`. Reclaman el audio igual que YouTube, así que pausan Spotify. Spotify ya se llamaba "Javi's Mix" desde f-013. Lista curada y playlist siguen siendo las de Asier hasta que el owner pase las suyas.
 
 ## f-020 — Terminal + GitHub activity
 
