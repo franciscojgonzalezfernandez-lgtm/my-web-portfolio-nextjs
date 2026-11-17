@@ -64,6 +64,14 @@ import {
 import { projects as portfolioProjects } from "@/data/projects.data";
 import { trackProjectClick } from "@/lib/analytics";
 import ProjectDocument from "./project-window";
+import {
+  buildNoteFolders,
+  DEFAULT_NOTE_ID,
+  findFolderByNoteId,
+  type Note,
+  type NoteFolder,
+} from "./notes-data";
+import { useLanguageStore } from "@/stores/useLanguageStore";
 
 type Project = {
   id: string;
@@ -995,66 +1003,7 @@ function WindowShell({
 const formatProjectUrl = (url: string) =>
   url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
-type Note = {
-  id: string;
-  title: string;
-  meta: string;
-  section?: string;
-  paragraphs: string[];
-  url?: string;
-  image?: string;
-};
-type NoteFolder = { id: string; title: string; notes: Note[] };
 type NotesView = "folders" | "list" | "note";
-
-const noteFolders: NoteFolder[] = [
-  {
-    id: "notes",
-    title: "Notes",
-    notes: [
-      {
-        id: "about",
-        title: "About Javi",
-        meta: "17 November 2026",
-        paragraphs: [
-          "Full-stack software engineer and technical manager based in Switzerland.",
-          "Snowboard instructor at Flumserberg in winter, building fast, reliable web products all year round.",
-        ],
-      },
-    ],
-  },
-  {
-    id: "projects",
-    title: "Projects",
-    notes: projects.map((project) => ({
-      id: project.id,
-      title: project.title,
-      meta: project.category,
-      paragraphs: project.outcome
-        ? [project.description, project.outcome]
-        : [project.description],
-      url: project.url,
-      image: project.image,
-    })),
-  },
-];
-
-const noteIds = noteFolders.flatMap((folder) => folder.notes.map((note) => note.id));
-const seenNoteIds = new Set<string>();
-noteIds.forEach((id) => {
-  if (seenNoteIds.has(id)) throw new Error(`Duplicate note id: ${id}`);
-  seenNoteIds.add(id);
-});
-if (noteFolders.length === 0 || noteFolders.some((folder) => folder.notes.length === 0)) {
-  throw new Error("Every notes folder needs at least one note");
-}
-
-const findFolderByNoteId = (noteId: string) => {
-  const match = noteFolders.find((folder) => folder.notes.some((note) => note.id === noteId));
-  const fallback = noteFolders[0];
-  if (!fallback) throw new Error("Every notes folder needs at least one note");
-  return match ?? fallback;
-};
 
 const NotesBackButton = ({
   label,
@@ -1083,9 +1032,15 @@ const NotesBackButton = ({
   </button>
 );
 
-const NotesApp = ({ noteId, view = "note" }: NotesTarget) => {
+const NotesApp = ({
+  noteId,
+  view = "note",
+  onOpenProject,
+}: NotesTarget & { onOpenProject: (slug: string) => void }) => {
+  const language = useLanguageStore((state) => state.language);
+  const noteFolders = buildNoteFolders(language);
   const [activeFolderId, setActiveFolderId] = useState(
-    findFolderByNoteId(noteId).id,
+    findFolderByNoteId(noteFolders, noteId).id,
   );
   const [activeNoteId, setActiveNoteId] = useState(noteId);
   const [mobileView, setMobileView] = useState<NotesView>(view);
@@ -1219,10 +1174,31 @@ const NotesApp = ({ noteId, view = "note" }: NotesTarget) => {
         {activeNote.paragraphs.map((paragraph, paragraphIndex) => (
           <p key={`${paragraphIndex}-${paragraph}`}>{paragraph}</p>
         ))}
-        {activeNote.url ? (
-          <a href={activeNote.url} target="_blank" rel="noreferrer">
-            {formatProjectUrl(activeNote.url)}
-          </a>
+        {activeNote.bullets?.length ? (
+          <ul className="notes-bullets">
+            {activeNote.bullets.map((bullet) => (
+              <li key={bullet}>{bullet}</li>
+            ))}
+          </ul>
+        ) : null}
+        {activeNote.links?.length ? (
+          <p className="notes-links">
+            {activeNote.links.map((link) =>
+              link.project ? (
+                <button
+                  key={link.label}
+                  type="button"
+                  onClick={() => onOpenProject(link.project as string)}
+                >
+                  {link.label} ›
+                </button>
+              ) : (
+                <a key={link.label} href={link.url} target="_blank" rel="noreferrer">
+                  {link.url ? formatProjectUrl(link.url) : link.label}
+                </a>
+              ),
+            )}
+          </p>
         ) : null}
         <HomeIndicatorSpacer />
       </article>
@@ -1234,10 +1210,19 @@ const NotesWindow = ({
   noteId,
   view,
   onClose,
+  onOpenProject,
   ...stackProps
-}: NotesTarget & { onClose: () => void } & WindowStackProps) => (
+}: NotesTarget & {
+  onClose: () => void;
+  onOpenProject: (slug: string) => void;
+} & WindowStackProps) => (
   <WindowShell title="Notes" onClose={onClose} {...stackProps}>
-    <NotesApp key={`${noteId}-${view}`} noteId={noteId} view={view} />
+    <NotesApp
+      key={`${noteId}-${view}`}
+      noteId={noteId}
+      view={view}
+      onOpenProject={onOpenProject}
+    />
   </WindowShell>
 );
 
@@ -6735,7 +6720,7 @@ export default function Home() {
     if ("href" in app) return;
     setSelected(app.id);
     if (app.id === "notes") {
-      openNotes({ noteId: "about" });
+      openNotes({ noteId: DEFAULT_NOTE_ID });
       return;
     }
     if (app.id === "spotify") {
@@ -7059,6 +7044,7 @@ export default function Home() {
           return (
             <NotesWindow
               key={window.id}
+              onOpenProject={openProject}
               noteId={window.content.noteId}
               view={window.content.view}
               onClose={onClose}
