@@ -203,16 +203,17 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-014 — Finder + carpeta Projects + deep links de proyecto
 
-- Estado: backlog · Prioridad: P1
+- Estado: review · Prioridad: P1
 - Depende de: f-013
 - AC:
-  - [ ] Finder portado (sidebar Favorites/iCloud, vista de iconos)
-  - [ ] Carpeta `Projects` en el escritorio con un icono por entrada de `data/projects.data.ts` (mismo orden)
-  - [ ] Abrir un proyecto muestra una ventana con su contenido (título, descripción, tecnologías, imágenes, vídeo vía `CustomVideo`) en EN/DE
-  - [ ] `trackProjectClick` se dispara al abrir un proyecto
-  - [ ] `/desktop?open=project:<slug>` abre el escritorio con ese proyecto abierto (mecanismo de deep link reutilizado por f-024)
-  - [ ] iOS: carpeta como overlay; proyecto a pantalla completa
-  - [ ] Gates de f-013
+  - [x] Finder portado (sidebar Favorites/iCloud, vista de iconos)
+  - [x] Carpeta `Projects` en el escritorio con un icono por entrada de `data/projects.data.ts` (mismo orden)
+  - [x] Abrir un proyecto muestra una ventana con su contenido (título, descripción, tecnologías, imágenes, vídeo vía `CustomVideo`) en EN/DE
+  - [x] `trackProjectClick` se dispara al abrir un proyecto
+  - [x] `/desktop?open=project:<slug>` abre el escritorio con ese proyecto abierto (mecanismo de deep link reutilizado por f-024)
+  - [x] iOS: carpeta como overlay; proyecto a pantalla completa
+  - [x] Gates de f-013
+- Notas: `FolderWindow` en `desktop.tsx` pasa a ser genérico (`folder: "secret" | "projects"`); el documento de proyecto vive en `components/os/project-window.tsx` + `.css`. En iOS la carpeta abre la app Files (patrón de Asier) en vez de un overlay de carpeta. `readDeepLink()` exportado para f-024. La carpeta "Projects" de Notes se mantiene hasta que f-015 reorganice Notes.
 
 ## f-015 — Notes: About, Experience, Hobbies
 

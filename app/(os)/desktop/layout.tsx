@@ -4,6 +4,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { AnalyticsWrapper } from "@/components/high-order-components/Analytics-wrapper";
 import "@/components/os/os.css";
 import "@/components/os/startup-screen.css";
+import "@/components/os/project-window.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
