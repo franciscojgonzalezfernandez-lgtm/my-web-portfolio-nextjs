@@ -33,6 +33,8 @@ import WeatherApp from "./weather-app";
 import YouTubeApp from "./youtube";
 import { useYouTubeConnection, YouTubeStartupError } from "./use-youtube-connection";
 import ChatGPTApp from "./chatgpt";
+import InstagramProfile from "./instagram";
+import FacebookFeed from "./facebook";
 import StartupScreen from "./startup-screen";
 import LanguageMenu from "./language-menu";
 import {
@@ -131,6 +133,8 @@ const apps = [
   { id: "settings", name: "Settings", icon: "/os/doc-icons/settings.svg" },
   { id: "weather", name: "Weather", icon: "/os/doc-icons/weather.svg" },
   { id: "chatgpt", name: "ChatGPT", icon: "/os/doc-icons/chatgpt.svg" },
+  { id: "instagram", name: "Instagram", icon: "/os/doc-icons/instagram.svg" },
+  { id: "facebook", name: "Facebook", icon: "/os/doc-icons/facebook.svg" },
   {
     id: "linkedin",
     name: "LinkedIn",
@@ -1282,6 +1286,8 @@ const ICON_PLATE: Record<AppId, number> = {
   "activity-monitor": 1,
   freeform: 1,
   settings: 1,
+  instagram: 104 / 128,
+  facebook: 104 / 128,
   trash: 862 / 1024,
 };
 
@@ -1611,6 +1617,36 @@ function AppWindow({
     return (
       <WindowShell title="Freeform" onClose={onClose} {...stackProps}>
         <FreeformBoard />
+      </WindowShell>
+    );
+  }
+  if (app === "instagram") {
+    return (
+      <WindowShell title="Instagram" onClose={onClose} variant="dark" {...stackProps}>
+        <div className="browser-bar citizenx-browser-bar">
+          <span>‹</span>
+          <span>›</span>
+          <div>
+            <BrowserLockIcon />
+            instagram.com/javi
+          </div>
+        </div>
+        <InstagramProfile />
+      </WindowShell>
+    );
+  }
+  if (app === "facebook") {
+    return (
+      <WindowShell title="Facebook" onClose={onClose} {...stackProps}>
+        <div className="browser-bar citizenx-browser-bar">
+          <span>‹</span>
+          <span>›</span>
+          <div>
+            <BrowserLockIcon />
+            facebook.com
+          </div>
+        </div>
+        <FacebookFeed />
       </WindowShell>
     );
   }
@@ -4377,6 +4413,14 @@ const memeImages = [
     ratio: 896 / 829,
     markupStorageKey: "javi-os-preview-smart-rich-markup",
   },
+  {
+    id: "sketch-image",
+    src: "/os/sketch.svg",
+    label: "Sketch.png",
+    alt: "A blank canvas to draw on with the markup tools.",
+    ratio: 1200 / 800,
+    markupStorageKey: "javi-os-preview-sketch-markup",
+  },
 ] as const satisfies readonly MemeImage[];
 
 type MemeId = (typeof memeImages)[number]["id"];
@@ -5389,7 +5433,7 @@ const DesktopWidget = ({
   position,
   onMove,
   onOpen,
-  label = "Zurich weather widget. Press Enter to open Weather. Drag or use arrow keys to move.",
+  label = "Madrid weather widget. Press Enter to open Weather. Drag or use arrow keys to move.",
   className,
   children,
 }: {

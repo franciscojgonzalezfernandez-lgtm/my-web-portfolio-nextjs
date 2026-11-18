@@ -302,15 +302,16 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-023 — Extras de Asier: Weather, Paint, ChatGPT, Instagram, Facebook, Trash
 
-- Estado: backlog · Prioridad: P3
+- Estado: review · Prioridad: P3
 - Depende de: f-013
 - AC:
-  - [ ] Weather portado con ubicación en España (widget + app)
-  - [ ] Editor tipo Paint portado (lápiz, rotulador, texto)
-  - [ ] ChatGPT portado (respuestas por intents locales, sin backend), adaptado a Javi
-  - [ ] Instagram y Facebook portados con contenido placeholder de Javi (sin fotos ni datos de Asier)
-  - [ ] Trash, matrix rain, console art
-  - [ ] Gates de f-013
+  - [x] Weather portado con ubicación en España (widget: Madrid; app: Madrid, Granada, Sierra Nevada, Flumserberg, Zurich)
+  - [x] Editor tipo Paint portado (lápiz, rotulador, texto): es el markup de Preview de Asier; además de los memes hay un lienzo en blanco `Sketch.png` en el escritorio
+  - [x] ChatGPT portado (respuestas por intents locales, sin backend), adaptado a Javi
+  - [x] Instagram y Facebook portados con contenido placeholder de Javi (sin fotos ni datos de Asier)
+  - [x] Trash, matrix rain, console art
+  - [x] Gates de f-013
+- Notas: Instagram usa la librería de fotos de Javi (f-017) con el handle `javi-tricker` y solo el contador de posts, sin seguidores inventados; Javi no tiene Instagram, así que "Message" lleva a YouTube. Facebook mantiene el feed humorístico genérico de Asier (sin datos personales) con el perfil de Javi; se recuperan sus dos imágenes genéricas. ChatGPT: saludo adaptado a Javi. Console art: banner "JAVI" en la consola. CitizenX y X no se portan: son la empresa y la cuenta de Asier.
 
 ## f-024 — Cutover: el escritorio pasa a `/`
 

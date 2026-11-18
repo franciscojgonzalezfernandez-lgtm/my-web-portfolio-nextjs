@@ -243,7 +243,7 @@ const TopBar = () => (
         );
       })}
     </nav>
-    <Avatar name="Asier Bayon" className="size-10" />
+    <Avatar name="Javi González" className="size-10" />
   </header>
 );
 
@@ -431,7 +431,7 @@ const PostCard = ({ post }: { post: FeedPost }) => {
       </ul>
 
       <form onSubmit={handleSubmitComment} className="flex items-center gap-2 px-4 pt-2 pb-3">
-        <Avatar name="Asier Bayon" className="size-8" />
+        <Avatar name="Javi González" className="size-8" />
         <input
           ref={commentInputRef}
           value={draft}

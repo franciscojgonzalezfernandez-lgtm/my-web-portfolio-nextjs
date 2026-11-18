@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { AnalyticsWrapper } from "@/components/high-order-components/Analytics-wrapper";
+import ConsoleArt from "@/components/os/console-art";
 import "@/components/os/os.css";
 import "@/components/os/startup-screen.css";
 import "@/components/os/project-window.css";
@@ -37,6 +38,7 @@ export default function OsRootLayout({
         className={`${geistSans.variable} ${geistMono.variable}`}
         suppressHydrationWarning
       >
+        <ConsoleArt />
         {children}
         {gaId ? <AnalyticsWrapper /> : null}
       </body>

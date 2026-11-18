@@ -208,7 +208,7 @@ const ProfileActions = ({
         href={PROFILE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Message asierbayon on Instagram, opens in a new tab"
+        aria-label="Message Javi on YouTube, opens in a new tab"
         className="grid h-8 flex-1 place-items-center rounded-lg bg-[#363636] px-4 text-sm font-semibold text-[#f5f5f5] transition-colors hover:bg-[#262626] @2xl:flex-none"
       >
         Message
@@ -219,8 +219,8 @@ const ProfileActions = ({
 
 const ProfileBio = ({ className }: { className: string }) => (
   <div className={`${className} text-sm leading-[18px]`}>
-    <p className="text-[#a8a8a8]">Unprofessional account</p>
-    <p className="mt-2">Probably in the mountains</p>
+    <p className="text-[#a8a8a8]">Full-stack engineer</p>
+    <p className="mt-2">Snowboard instructor at Flumserberg 🏂</p>
     <p>Based in Switzerland</p>
   </div>
 );
@@ -228,8 +228,6 @@ const ProfileBio = ({ className }: { className: string }) => (
 const ProfileStats = ({ className }: { className: string }) => {
   const stats = [
     { label: "posts", value: formatCount(posts.length) },
-    { label: "followers", value: formatCount(9100) },
-    { label: "following", value: formatCount(1400) },
   ];
 
   return (
@@ -767,7 +765,7 @@ export default function InstagramProfile() {
                 <h2 className="hidden text-xl leading-6 font-normal min-[701px]:block">{USERNAME}</h2>
                 <ProfileActions isFollowing={isFollowing} onToggleFollow={handleToggleFollow} className="hidden @2xl:flex" />
               </div>
-              <p className="text-sm leading-[18px] font-semibold @2xl:mt-4 @2xl:text-base">Asier Bayón</p>
+              <p className="text-sm leading-[18px] font-semibold @2xl:mt-4 @2xl:text-base">Javi González</p>
               <ProfileStats className="mt-2 flex gap-5 @2xl:mt-3 @2xl:gap-10 @2xl:text-base" />
               <ProfileBio className="mt-5 hidden @2xl:block" />
             </div>
@@ -818,7 +816,7 @@ export default function InstagramProfile() {
               <p className="max-w-xs text-sm text-[#a8a8a8]">
                 {activeTab === "reels"
                   ? "Too busy hiking to edit videos. Check the posts instead."
-                  : "When people tag asierbayon in photos, they'll appear here."}
+                  : "When people tag Javi in photos, they'll appear here."}
               </p>
             </div>
           )}
