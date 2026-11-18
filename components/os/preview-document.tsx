@@ -13,7 +13,7 @@ export type PreviewDoc = { kind: "cv" } | { kind: "certificate"; id: string };
 
 const driveFileId = (url: string) => url.match(/\/file\/d\/([^/]+)/)?.[1] ?? null;
 
-export const certificateDocs = certifications.map((certificate) => {
+const documentDocs = certifications.map((certificate) => {
   const fileId = driveFileId(certificate.driveUrl);
   return {
     ...certificate,
@@ -24,11 +24,14 @@ export const certificateDocs = certifications.map((certificate) => {
   };
 });
 
+export const certificateDocs = documentDocs.filter((doc) => doc.folder === "certifications");
+export const referenceDocs = documentDocs.filter((doc) => doc.folder === "references");
+
 export const findCertificate = (id: string) =>
-  certificateDocs.find((certificate) => certificate.id === id);
+  documentDocs.find((certificate) => certificate.id === id);
 
 export const certificateLabel = (
-  certificate: (typeof certificateDocs)[number],
+  certificate: (typeof documentDocs)[number],
   isGerman: boolean,
 ) => `${isGerman ? certificate.titleGerman : certificate.title}.pdf`;
 

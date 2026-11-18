@@ -351,3 +351,18 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
   - [x] Widget del tiempo rota entre Madrid, Flumserberg y Zurich (decisión del owner: "todas")
   - [x] `tsc`, `lint`, `build` y navegador (375×812 y 1280×800, DE)
 - Notas: el owner decidió mantener todo el contenido de Asier (memes, Facebook…). El hallazgo de "duplicados en el árbol de accesibilidad" era un falso positivo: la capa oculta usa `display: none`. Strings en `components/os/os-i18n.ts`. La review queda en `.impeccable/critique/` (sin commitear).
+
+## f-027 — Contenido del owner: Java, B1, References, CV nuevo, Intro destacado
+
+- Estado: review · Prioridad: P1
+- Depende de: f-026
+- AC:
+  - [x] About This Mac: "Chip" incluye Java (`TypeScript · Java · React · Next.js`)
+  - [x] "Dont play this video.mov" vuelve a reproducirse: el `VideoWindow` reclama el audio al montarse (Strict Mode soltaba el claim y el player se quedaba en negro, pausado)
+  - [x] Nuevo certificado telc Deutsch B1 en "Meine Zertifikate"
+  - [x] Nueva carpeta "References" / "Referenzen" (escritorio, home iOS, deep link `?open=folder:references`, `open references` en Terminal) con la carta de recomendación y la Arbeitsbestätigung; salen de Certifications
+  - [x] Intro.mov destacado: arriba a la derecha con un globo "About me · Watch this first" (respeta `prefers-reduced-motion`; el hueco a su izquierda queda libre); en iOS se llama "About me" con punto rojo y va primero
+  - [x] "Don't Open" contiene también el intro como "The video you should see.mov"
+  - [x] `public/CV-Javi.pdf` sustituido por el CV nuevo (Lead Software Engineer AI)
+  - [x] `tsc`, `lint`, `build` y navegador (1280×800 y 375×812, DE)
+- Notas: fecha y emisor de la Arbeitsbestätigung pendientes del owner (`data/certifications.data.ts`). Clave de posiciones del escritorio subida a `v3` para que todos vean el nuevo orden.
