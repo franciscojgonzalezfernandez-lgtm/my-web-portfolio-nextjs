@@ -15,9 +15,9 @@ export const certifications = [
   {
     title: "Employment Reference (Arbeitsbestätigung)",
     titleGerman: "Arbeitsbestätigung",
-    issuer: "",
-    issuerGerman: "",
-    date: "",
+    issuer: "IBE – Institute for Educational Evaluation",
+    issuerGerman: "IBE – Institut für Bildungsevaluation",
+    date: "22.10.2026",
     type: "certification" as const,
     folder: "references" as const,
     driveUrl:
