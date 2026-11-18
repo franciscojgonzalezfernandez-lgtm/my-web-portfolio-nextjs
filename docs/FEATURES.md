@@ -381,3 +381,16 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
   - [x] Corregida la comilla suelta al inicio de la descripción de Trading Algorithm (EN/DE)
   - [x] `tsc`, `lint`, `build` y navegador (1280×800 y 375×812, ES)
 - Notas: las apps de Asier (Weather, ChatGPT, Instagram, Facebook, Paint, YouTube, Spotify) siguen en inglés en los tres idiomas, como antes en alemán.
+
+## f-029 — Ride Flumserberg: experiencia y proyecto
+
+- Estado: review · Prioridad: P1
+- Depende de: f-028
+- AC:
+  - [x] Nuevo proyecto `ride-flumserberg` (Profesional, publicado 16-05-2026 = primer deploy a producción) en EN/DE/ES, primero en la carpeta Projects; enlaces a rideflumserberg.ch y al repo
+  - [x] Contenido sacado del README del repo y de la web: producto (reserva en 5 pasos, Stripe + TWINT, admin, panel de instructor, emails), ingeniería (Next.js 15, Prisma + Neon, Better Auth, CI, Sentry) y la parte personal (escuela propia, Einzelfirma, clases en tres idiomas)
+  - [x] 7 capturas del repo convertidas a WebP en `public/ride-flumserberg-*.webp`
+  - [x] Nueva experiencia "Ride Flumserberg" (May 2026 - Now) la primera en Notes > Experience, con enlace al proyecto
+  - [x] `/portfolio/ride-flumserberg` generado en `out/` y en `sitemap.xml`
+  - [x] `tsc`, `lint`, `build` y navegador (EN/DE/ES)
+- Notas: el vídeo del proyecto queda pendiente (owner); cuando exista va en `videoUrl`.
