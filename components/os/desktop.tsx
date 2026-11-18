@@ -62,6 +62,8 @@ import {
   type YouTubeSession,
 } from "./media";
 import { projects as portfolioProjects } from "@/data/projects.data";
+import { trackProjectClick } from "@/lib/analytics";
+import ProjectDocument from "./project-window";
 
 type Project = {
   id: string;
@@ -126,7 +128,8 @@ type NotesTarget = { noteId: string; view?: NotesView };
 type WindowState =
   | ({ kind: "notes" } & NotesTarget)
   | { kind: "app"; app: WindowAppId }
-  | { kind: "folder" }
+  | { kind: "folder"; folder: FolderId }
+  | { kind: "project"; slug: string }
   | { kind: "video" }
   | { kind: "spotify" }
   | { kind: "youtube" }
@@ -141,8 +144,24 @@ type OpenWindow = {
   minimizedAt: number | null;
 };
 
+type FolderId = "secret" | "projects";
+
+type DeepLinkTarget = { kind: "project"; slug: string } | { kind: "folder"; folder: "projects" };
+
+export const readDeepLink = (search: string): DeepLinkTarget | null => {
+  const open = new URLSearchParams(search).get("open");
+  if (!open) return null;
+  const [kind, value] = open.split(":");
+  if (kind === "project" && portfolioProjects.some((project) => project.slug === value)) {
+    return { kind: "project", slug: value };
+  }
+  if (kind === "folder" && value === "projects") return { kind: "folder", folder: "projects" };
+  return null;
+};
+
 const windowKey = (content: WindowState) => {
-  if (content.kind === "folder") return null;
+  if (content.kind === "folder") return content.folder === "secret" ? null : `folder:${content.folder}`;
+  if (content.kind === "project") return `project:${content.slug}`;
   if (content.kind === "image") return `image:${content.memeId}`;
   if (content.kind === "app") return `app:${content.app}`;
   return content.kind;
@@ -1538,11 +1557,37 @@ function AppWindow({
   );
 }
 
+type FolderItem = {
+  id: string;
+  label: string;
+  meta?: string;
+  thumbnail?: string;
+  onOpen: () => void;
+};
+
 function FolderWindow({
+  folder,
   onClose,
   onOpenVideo,
+  onOpenProject,
   ...stackProps
-}: { onClose: () => void; onOpenVideo: () => void } & WindowStackProps) {
+}: {
+  folder: FolderId;
+  onClose: () => void;
+  onOpenVideo: () => void;
+  onOpenProject: (slug: string) => void;
+} & WindowStackProps) {
+  const title = folder === "projects" ? "Projects" : "Don't Open";
+  const items: FolderItem[] =
+    folder === "projects"
+      ? portfolioProjects.map((project) => ({
+          id: project.slug,
+          label: project.title,
+          meta: project.projectType,
+          thumbnail: project.images[0],
+          onOpen: () => onOpenProject(project.slug),
+        }))
+      : [];
   const sidebar = [
     {
       title: "iCloud",
@@ -1566,7 +1611,7 @@ function FolderWindow({
   ];
 
   return (
-    <WindowShell title="Don't Open" onClose={onClose} {...stackProps}>
+    <WindowShell title={title} onClose={onClose} {...stackProps}>
       <div className="finder-app">
         <div className="finder-toolbar">
           <div className="finder-arrows">
@@ -1579,7 +1624,7 @@ function FolderWindow({
           </div>
           <b>
             <span className="tiny-folder" />
-            Don&apos;t Open
+            {title}
           </b>
           <div className="finder-tools">
             <div className="view-switcher">
@@ -1620,7 +1665,7 @@ function FolderWindow({
               <div key={group.title}>
                 <h3>{group.title}</h3>
                 {group.items.map((item) => (
-                  <p key={item.label}>
+                  <p key={item.label} data-active={item.label === title || undefined}>
                     <i className={`sidebar-icon ${item.icon}`}>
                       <span />
                     </i>
@@ -1630,6 +1675,31 @@ function FolderWindow({
               </div>
             ))}
           </aside>
+          {folder === "projects" ? (
+            <div className="finder-files finder-grid">
+              {items.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="finder-thumb-file"
+                  aria-label={`Open ${item.label}`}
+                  onDoubleClick={item.onOpen}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") item.onOpen();
+                  }}
+                  onClick={(event) => {
+                    // Touch and pen have no double click; a tap opens directly.
+                    if ((event.nativeEvent as PointerEvent).pointerType !== "mouse") item.onOpen();
+                  }}
+                >
+                  <span className="finder-thumb">
+                    {item.thumbnail ? <img src={item.thumbnail} alt="" loading="lazy" /> : null}
+                  </span>
+                  <strong>{item.label}</strong>
+                </button>
+              ))}
+            </div>
+          ) : (
           <div className="finder-files">
             <button
               className="movie-file"
@@ -1644,17 +1714,23 @@ function FolderWindow({
               </strong>
             </button>
           </div>
+          )}
         </div>
         <div className="finder-status">
           <div>
             <span className="tiny-folder" />
             Macintosh HD <b>›</b> Users <b>›</b> javi <b>›</b> Desktop <b>›</b>{" "}
-            <strong>Don&apos;t Open</strong>
+            <strong>{title}</strong>
           </div>
-          <span>1 item</span>
+          <span>{folder === "projects" ? `${items.length} items` : "1 item"}</span>
         </div>
       </div>
-      <FilesApp title="Don't Open" onBack={onClose} onOpenVideo={onOpenVideo} />
+      <FilesApp
+        title={title}
+        onBack={onClose}
+        onOpenVideo={onOpenVideo}
+        items={folder === "projects" ? items : undefined}
+      />
     </WindowShell>
   );
 }
@@ -1720,9 +1796,10 @@ type FilesAppProps = {
   title: string;
   onBack: () => void;
   onOpenVideo: () => void;
+  items?: FolderItem[];
 };
 
-const FilesApp = ({ title, onBack, onOpenVideo }: FilesAppProps) => (
+const FilesApp = ({ title, onBack, onOpenVideo, items }: FilesAppProps) => (
   <div className="files-app">
     <header className="files-header">
       <div className="files-nav">
@@ -1761,19 +1838,37 @@ const FilesApp = ({ title, onBack, onOpenVideo }: FilesAppProps) => (
     </header>
     <div className="files-content">
       <div className="files-grid">
-        <button
-          className="files-item"
-          type="button"
-          aria-label="Open Dont play this video.mov"
-          onClick={onOpenVideo}
-        >
-          <MovIcon />
-          <strong>Dont play this video</strong>
-          <small>12 Oct 2025</small>
-          <small>42.1 MB</small>
-        </button>
+        {items ? (
+          items.map((item) => (
+            <button
+              key={item.id}
+              className="files-item"
+              type="button"
+              aria-label={`Open ${item.label}`}
+              onClick={item.onOpen}
+            >
+              <span className="files-thumb">
+                {item.thumbnail ? <img src={item.thumbnail} alt="" loading="lazy" /> : null}
+              </span>
+              <strong>{item.label}</strong>
+              {item.meta ? <small>{item.meta}</small> : null}
+            </button>
+          ))
+        ) : (
+          <button
+            className="files-item"
+            type="button"
+            aria-label="Open Dont play this video.mov"
+            onClick={onOpenVideo}
+          >
+            <MovIcon />
+            <strong>Dont play this video</strong>
+            <small>12 Oct 2025</small>
+            <small>42.1 MB</small>
+          </button>
+        )}
       </div>
-      <p className="files-count">1 item</p>
+      <p className="files-count">{items ? `${items.length} items` : "1 item"}</p>
     </div>
     <nav className="files-tabs" aria-hidden="true">
       {FILES_TABS.map((tab) => (
@@ -6196,10 +6291,19 @@ const DARK_SURFACE_IDS = new Set<string>(["spotify", "youtube", "instagram", "we
 
 const describeMinimizedWindow = (item: OpenWindow): MinimizedWindowTile => {
   const { id, content } = item;
+  if (content.kind === "project") {
+    const project = portfolioProjects.find((entry) => entry.slug === content.slug);
+    return {
+      id,
+      label: project?.title ?? "Project",
+      preview: project?.images[0],
+      variant: "paper",
+    };
+  }
   if (content.kind === "folder") {
     return {
       id,
-      label: "Don't Open",
+      label: content.folder === "projects" ? "Projects" : "Don't Open",
       icon: "/os/doc-icons/folder.png",
       variant: "paper",
     };
@@ -6575,14 +6679,29 @@ export default function Home() {
   }, [savedIconPositions]);
 
   const handleOpenProjectsFolder = () => {
-    const project = projects[0];
-    if (!project) return;
     setSelected("projects-folder");
-    openNotes({ noteId: project.id, view: "list" });
+    addWindow({ kind: "folder", folder: "projects" });
   };
+  const openProject = (slug: string) => {
+    const project = portfolioProjects.find((entry) => entry.slug === slug);
+    if (!project) return;
+    trackProjectClick(project.slug, project.projectType);
+    addWindow({ kind: "project", slug });
+  };
+  // Deep links: /desktop?open=project:<slug> or ?open=folder:projects. f-024
+  // maps the old routes (/portfolio/<slug>, …) onto the same targets.
+  const handledDeepLink = useRef(false);
+  useEffect(() => {
+    if (handledDeepLink.current) return;
+    handledDeepLink.current = true;
+    const target = readDeepLink(window.location.search);
+    if (!target) return;
+    if (target.kind === "project") openProject(target.slug);
+    else addWindow({ kind: "folder", folder: target.folder });
+  });
   const handleOpenSecretFolder = () => {
     setSelected("folder");
-    addWindow({ kind: "folder" });
+    addWindow({ kind: "folder", folder: "secret" });
   };
   const handleOpenMemeImage = (memeId: MemeId) => {
     setSelected(memeId);
@@ -6959,11 +7078,23 @@ export default function Home() {
           return (
             <FolderWindow
               key={window.id}
+              folder={window.content.folder}
               onClose={onClose}
               onOpenVideo={openVideo}
+              onOpenProject={openProject}
               {...stackProps}
             />
           );
+        if (window.content.kind === "project") {
+          const { slug } = window.content;
+          const project = portfolioProjects.find((entry) => entry.slug === slug);
+          if (!project) return null;
+          return (
+            <WindowShell key={window.id} title={project.title} onClose={onClose} {...stackProps}>
+              <ProjectDocument project={project} />
+            </WindowShell>
+          );
+        }
         if (window.content.kind === "image")
           return (
             <ImageWindow
