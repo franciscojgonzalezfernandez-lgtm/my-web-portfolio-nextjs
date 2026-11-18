@@ -4,11 +4,14 @@ export const NEXT_ECOSYSTEM: Project = {
   slug: "nextjs-ecosystem",
   title: "Nextjs Ecosystem - Movistar Portal",
   titleGerman: "Next.js-Ökosystem - Movistar-Portal",
+  titleSpanish: "Ecosistema Next.js - Portal de Movistar",
   projectType: "Professional",
   description:
     "The full integration of Adobe's CMS across the entire Telefónica environment.",
   descriptionGerman:
     "Die vollständige Integration des Adobe CMS in die gesamte Telefónica-Umgebung.",
+  descriptionSpanish:
+    "La integración completa del CMS de Adobe en todo el ecosistema de Telefónica.",
   images: [
     "/next-ecosystem-cover.webp",
     "/next-rendition-strategy.webp",
@@ -75,6 +78,26 @@ export const NEXT_ECOSYSTEM: Project = {
     ✅ Vertikale Teams <strong>unabhängig entwickelnd</strong> mit einheitlicher technischer Basis
     ✅ miMovistar als <strong>digeritales Umsatzmotor</strong> für Telefónica
     ✅ <strong>Maximaler Code-Wiederverwendung</strong> + konsistente UX über alle Anwendungen`,
+  fullDescriptionSpanish: `<strong>Arquitectura estratégica</strong> que unificó varios equipos y verticales en un ecosistema de alto rendimiento, con liderazgo técnico orientado a la máxima escalabilidad y optimización.
+
+    <h3 className="text-xl"><strong>Mi rol estratégico</strong></h3>
+    - <strong>Visión global</strong> + desarrollo del contexto compartido (datos de usuario, cartera de productos, ofertas personalizadas)
+    - <strong>Semilla técnica</strong> con un boilerplate completo para todas las verticales (integraciones con APIs + librerías)
+    - <strong>Liderazgo técnico de miMovistar</strong>: conocía cada línea de código + seguimiento diario del equipo
+    - Capa de abstracción + librería en Google Artifact Registry para las APIs legacy de Telefónica
+    - <strong>Migración de SSG a ISR</strong> como decisión estratégica + optimizaciones avanzadas (WebP, renditions)
+
+    <h3 className="text-xl"><strong>Retos resueltos</strong></h3>
+    - Coordinar el <strong>desarrollo en paralelo</strong> de más de 6 verticales manteniendo la coherencia técnica
+    - <strong>APIs lentas y sobredimensionadas</strong> → abstracción + normalización de respuestas
+    - <strong>Contenido de catálogo muy dinámico</strong> + ISR para actualizar precios y promociones en tiempo real
+    - Complejidad de miMovistar: paquetes incompatibles + promociones caducadas + cartera de clientes
+
+    <h3 className="text-xl"><strong>Resultados</strong></h3>
+    ✅ <strong>Rendimiento en Lighthouse casi perfecto</strong> (también para clientes logados)
+    ✅ Equipos de vertical <strong>desarrollando de forma independiente</strong> sobre una base técnica común
+    ✅ miMovistar como <strong>motor de ingresos digitales</strong> de Telefónica
+    ✅ <strong>Máxima reutilización de código</strong> + UX coherente entre aplicaciones`,
   videoUrl: "/next-ecosystem.webm",
   externalUrl: "https://www.movistar.es/fibra-y-movil/configurador/",
   releaseDate: "06-05-2022",

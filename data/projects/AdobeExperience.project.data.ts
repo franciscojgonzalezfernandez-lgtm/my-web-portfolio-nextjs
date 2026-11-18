@@ -4,11 +4,14 @@ export const ADOBE_INTEGRATION: Project = {
   slug: "adobe-experience-manager-integration",
   title: "Custom AEM Integration for Telefónica",
   titleGerman: "Benutzerdefinierte AEM-Integration für Telefónica",
+  titleSpanish: "Integración de AEM a medida para Telefónica",
   projectType: "Professional",
   description:
     "The full integration of Adobe's CMS across the entire Telefónica environment.",
   descriptionGerman:
     "Die vollständige Integration des Adobe CMS in die gesamte Telefónica-Umgebung.",
+  descriptionSpanish:
+    "La integración completa del CMS de Adobe en todo el ecosistema de Telefónica.",
   images: [
     "/aem-cover.webp",
     "aem-arquetype.webp",
@@ -85,6 +88,31 @@ export const ADOBE_INTEGRATION: Project = {
        ✅ 100% Konsistenz des Movistar Design Systems
        
       Du kannst alles selbst unter [https://www.movistar.es/autonomos](https://www.movistar.es/autonomos) oder [https://www.telefonicaempresas.es](https://www.telefonicaempresas.es) ausprobieren!`,
+  fullDescriptionSpanish: `<strong>Lideré un equipo técnico de 6 personas</strong> para construir un CMS que permite a más de 40 usuarios no técnicos (UX/UI, ventas, SEO, analítica) gestionar de forma totalmente autónoma el portal de autónomos y empresas de Movistar.
+
+
+      <h3 className="text-xl"><strong>Mi rol estratégico</strong></h3>
+      - <strong>Mediación técnica</strong> entre las necesidades de negocio y las capacidades de la plataforma (UX frente a viabilidad técnica).
+      - <strong>Arquitectura end-to-end</strong>: frontend en ES6 + backend en Java (servicios OSGi, Sling Models, HTL).
+      - <strong>Diseño de flujos de trabajo multidisciplinares</strong> para coordinar a más de 40 personas sin fricciones.
+      - <strong>Control de la infraestructura</strong> en entorno cloud + gestión de releases críticas en CI/CD.
+      - Dominio rápido de las tecnologías de AEM + colaboración con consultores externos (VASS).
+
+
+      <h3 className="text-xl"><strong>Retos resueltos</strong></h3>
+      - Separé el desarrollo técnico de los flujos de publicación de contenido.
+      - <strong>Gestioné deploys monolíticos complejos</strong> con procesos de release muy controlados para evitar caídas en producción.
+      - Mantuve un rendimiento y un SEO óptimos en el monolito de producción.
+      - Escalé el trabajo para varios equipos con quality gates controlados.
+
+
+      <h3 className="text-xl"><strong>Resultados</strong></h3>
+       ✅ Equipos de UX/UI, ventas, SEO y analítica totalmente autosuficientes y muy satisfechos
+       ✅ Eficiencia de negocio: publicación independiente, desacoplada de los ciclos de desarrollo
+       ✅ Puntuaciones perfectas de Performance/SEO en Lighthouse
+       ✅ 100% de coherencia con el design system de Movistar
+
+      ¡Puedes comprobarlo tú mismo en [https://www.movistar.es/autonomos](https://www.movistar.es/autonomos) o en [https://www.telefonicaempresas.es](https://www.telefonicaempresas.es)!`,
   videoUrl: "/aem-demo.webm",
   releaseDate: "06-11-2024",
   externalUrl: "https://www.telefonicaempresas.es",

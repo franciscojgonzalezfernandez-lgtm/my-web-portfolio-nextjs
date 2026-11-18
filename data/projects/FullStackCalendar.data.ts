@@ -4,11 +4,14 @@ export const FULL_STACK_CALENDAR: Project = {
   slug: "full-stack-calendar",
   title: "Full-Stack Calendar App",
   titleGerman: "Full-Stack-Kalender-App",
+  titleSpanish: "App de calendario full stack",
   projectType: "Side Project",
   description:
     "Core full-stack calendar for future online booking systems. React 19 frontend + Node.js/Express backend + MongoDB Atlas.",
   descriptionGerman:
     "Kern-Full-Stack-Kalender für zukünftige Online-Buchungssysteme. React 19 Frontend + Node.js/Express Backend + MongoDB Atlas.",
+  descriptionSpanish:
+    "Núcleo de calendario full stack para futuros sistemas de reservas online. Frontend en React 19 + backend en Node.js/Express + MongoDB Atlas.",
   images: [
     "/calendar-cover.webp",
     "/calendar-diagram.webp",
@@ -84,6 +87,33 @@ export const FULL_STACK_CALENDAR: Project = {
    ✅ Sichere JWT-Auth + rollenbasierter Zugriff (eigene Events editierbar, fremde read-only)
    ✅ Schnelles Deployment: GitHub Pages + Railway + GitHub Actions CI/CD
    ✅ Kompletter Quellcode auf GitHub verfügbar
+`,
+  fullDescriptionSpanish: `Desarrollé una app de calendario full stack totalmente funcional que sirve como <b>base principal</b> de un futuro sistema de gestión de reservas online. Demuestra un desarrollo end-to-end, desde la autenticación hasta las operaciones con base de datos.
+
+  <h3 className="text-xl"><strong>Stack tecnológico y arquitectura</strong></h3>
+  - <b>Frontend</b>: React 19 + Vite para builds ultrarrápidos, Redux Toolkit para la gestión del estado (auth, eventos, modales), Axios con JWT para las llamadas a la API y Bootstrap para los estilos.
+  - <b>Backend</b>: Node.js + Express con APIs REST para operaciones CRUD, gestión de errores y autenticación JWT.
+  - <b>Base de datos</b>: cluster de MongoDB Atlas con Mongoose como ODM para la validación de esquemas y el mapeo de datos.
+  - <b>Deploy</b>: GitHub Pages (frontend), Railway (backend) y pipeline de CI/CD con GitHub Actions.
+
+  <h3 className="text-xl"><strong>Mi papel estratégico</strong></h3>
+  - <b>Ownership end-to-end</b>: diseñé una arquitectura escalable y reutilizable para plataformas de reservas en producción.
+  - <b>Foco en seguridad y UX</b>: auth basada en JWT, edición de eventos según rol (los propios en azul, los de otros en gris) y validación completa de formularios.
+  - <b>Deploy listo para producción</b>: configuración multientorno con una integración de CI/CD sin fricciones.
+  - <b>Optimización del rendimiento</b>: vistas de calendario rápidas y responsive (mensual/semanal/diaria) con gestión de errores en tiempo real.
+
+  <h3 className="text-xl"><strong>Retos resueltos</strong></h3>
+  - Integré React 19 con un backend estable en Node.js manteniendo la seguridad JWT en todo el stack.
+  - <b>Equilibré la flexibilidad schemaless de MongoDB</b> con la validación de Mongoose para tener operaciones de datos fiables.
+  - Entregué un <b>calendario multivista</b> con permisos CRUD por usuario y un footprint mínimo.
+  - Conseguí un deploy fluido en GitHub Pages + Railway con CI/CD sin downtime.
+
+  <h3 className="text-xl"><strong>Resultados</strong></h3>
+   ✅ Calendario full stack listo para producción con auth, multivista y operaciones CRUD
+   ✅ Núcleo de backend reutilizable para futuros sistemas de gestión de reservas
+   ✅ Auth JWT segura + acceso basado en roles (eventos propios editables, los de otros en solo lectura)
+   ✅ Deploy rápido: GitHub Pages + Railway + CI/CD con GitHub Actions
+   ✅ Código fuente completo disponible en GitHub
 `,
   videoUrl: "/calendar-demo.webm",
   releaseDate: "19-03-2026",

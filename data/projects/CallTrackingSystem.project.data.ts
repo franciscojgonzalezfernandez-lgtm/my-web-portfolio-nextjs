@@ -4,11 +4,14 @@ export const CALL_TRACKING: Project = {
   slug: "call-tracking-system",
   title: "Call Tracking System",
   titleGerman: "Call-Tracking-System",
+  titleSpanish: "Sistema de Call Tracking",
   projectType: "Professional",
   description:
     "Full‑stack development of a lead generation system based on call routing and call traceability.",
   descriptionGerman:
     "Full-Stack-Entwicklung eines Lead-Generierungs-Systems basierend auf Call-Routing und Call-Traceability.",
+  descriptionSpanish:
+    "Desarrollo full‑stack de un sistema de generación de leads basado en el enrutamiento y la trazabilidad de llamadas.",
   images: [
     "/call-tracking-cover.webp",
     "call-tracking-architecture.png",
@@ -86,6 +89,31 @@ export const CALL_TRACKING: Project = {
    ✅ Intelligentes kampagnenbasiertes Call-Center-Routing im Scale
    
   System liefert nach wie vor ROI in Production.`,
+  fullDescriptionSpanish: `<strong>Desarrollo de un sistema de call tracking</strong> que logró un 96% de precisión en la trazabilidad de la venta asistida, que supone el 60% de todas las conversiones de la web, conservando toda la propiedad intelectual y permitiendo analizar el customer journey completo, de la cookie a la llamada.
+  <h3 className="text-xl"><strong>Mi rol estratégico</strong></h3>
+  - <strong>Arquitectura end-to-end</strong>: backend en Maven con 4 APIs (configuración de campañas → motor de reglas → enrutamiento de números) desplegado en Google Cloud Platform.
+  - <strong>Integración con el pool de números</strong>: actualizaciones del estado de las llamadas en tiempo real para una atribución cookie-a-llamada precisa.
+  - <strong>Orquestación del click-to-call</strong>: frontend robusto que renderiza dinámicamente números gratuitos (tasa de error <1%) con enrutamiento inteligente por campaña hacia los call centers.
+  - <strong>Dominio del pipeline de datos</strong>: vistas y dashboards en BigQuery con ingesta vía Dataflow/Pub/Sub para business intelligence.
+  - <strong>Monitorización en producción</strong>: Google Cloud Monitoring + alertas en BigQuery para garantizar la fiabilidad del sistema 24/7.
+
+
+  <h3 className="text-xl"><strong>Retos resueltos</strong></h3>
+  - <strong>Mapeé el customer journey completo</strong>, desde las cookies de la web hasta la venta telefónica (60% de los ingresos totales).
+  - <strong>Implementé un enrutamiento inteligente de llamadas</strong> entre múltiples campañas/productos hacia el call center correcto, sin errores.
+  - <strong>Construí un sistema "best effort" de nivel producción</strong> con un 96% de precisión, protegiendo a la vez los algoritmos propietarios.
+  - <strong>Orquesté flujos de datos complejos</strong>: ingesta en tiempo real → análisis en BigQuery → dashboards de negocio accionables.
+  - Monitorización sin downtime en todo el stack de GCP.
+
+
+  <h3 className="text-xl"><strong>Resultados</strong></h3>
+   ✅ 96% de precisión en la trazabilidad de llamadas sobre el 60% de los ingresos de la web
+   ✅ Sistema todavía en producción con una tasa de error <1%
+   ✅ Visibilidad completa del customer journey, de la cookie → a la venta asistida
+   ✅ Dashboards de BigQuery listos para negocio + alertas automatizadas en Google Cloud
+   ✅ Enrutamiento inteligente a call centers por campaña, a escala
+
+  El sistema sigue generando ROI en producción a día de hoy.`,
   videoUrl: "scx-demo.webm",
   externalUrl: "https://www.movistar.es/fibra-optica/fibra-600mb/",
   releaseDate: "03-11-2019",

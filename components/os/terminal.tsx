@@ -66,7 +66,7 @@ const HELP: Array<[string, string]> = [
   ["open <name>", "open projects, cv, notes, mail, photos, youtube, intro or a project slug"],
   ["git log", "latest public GitHub activity"],
   ["github", "contribution graph"],
-  ["lang en|de", "switch the site language"],
+  ["lang en|de|es", "switch the site language"],
   ["date", "print the date"],
   ["echo <text>", "print text"],
   ["clear", "clear the screen"],
@@ -288,12 +288,20 @@ export default function Terminal({
         );
         return;
       case "lang":
-        if (argument === "en" || argument === "de") {
-          setLanguage(argument === "en" ? "english" : "german");
-          print(argument === "en" ? "Language set to English." : "Sprache auf Deutsch gestellt.");
-          return;
+        {
+          const confirmations = {
+            en: ["english", "Language set to English."],
+            de: ["german", "Sprache auf Deutsch gestellt."],
+            es: ["spanish", "Idioma cambiado a español."],
+          } as const;
+          const match = argument in confirmations ? confirmations[argument as keyof typeof confirmations] : null;
+          if (match) {
+            setLanguage(match[0]);
+            print(match[1]);
+            return;
+          }
         }
-        print("usage: lang en|de");
+        print("usage: lang en|de|es");
         return;
       case "date":
         print(new Date().toString());

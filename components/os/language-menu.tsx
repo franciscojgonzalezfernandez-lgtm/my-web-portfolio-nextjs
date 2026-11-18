@@ -2,13 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLanguageStore } from "@/stores/useLanguageStore";
-
-type Language = "english" | "german";
-
-const LANGUAGES: ReadonlyArray<{ id: Language; code: string; label: string; native: string }> = [
-  { id: "english", code: "EN", label: "English", native: "English" },
-  { id: "german", code: "DE", label: "German", native: "Deutsch" },
-];
+import { LANGUAGE_OPTIONS, languageOption } from "./os-i18n";
 
 const subscribeNever = () => () => {};
 
@@ -38,8 +32,8 @@ export default function LanguageMenu() {
     };
   }, [isOpen]);
 
-  const active = LANGUAGES.find((entry) => entry.id === (isHydrated ? language : "german")) ?? LANGUAGES[1];
-  const title = active.id === "german" ? "Sprache" : "Language";
+  const active = languageOption(isHydrated ? language : "german");
+  const title = active.title;
 
   return (
     <div className="language-menu" ref={rootRef}>
@@ -61,7 +55,7 @@ export default function LanguageMenu() {
       {isOpen && (
         <div className="language-menu-panel" role="menu" aria-label={title}>
           <small>{title}</small>
-          {LANGUAGES.map((entry) => (
+          {LANGUAGE_OPTIONS.map((entry) => (
             <button
               key={entry.id}
               type="button"

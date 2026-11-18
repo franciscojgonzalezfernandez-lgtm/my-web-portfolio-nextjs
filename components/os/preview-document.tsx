@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { certifications } from "@/data/certifications.data";
 import { trackCvDownload, trackExternalClick } from "@/lib/analytics";
-import { useLanguageStore } from "@/stores/useLanguageStore";
+import { localized } from "@/lib/i18n";
+import { useLanguageStore, type Language } from "@/stores/useLanguageStore";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 export const CV_PATH = `${BASE_PATH}/CV-Javi.pdf`;
@@ -32,12 +33,13 @@ export const findCertificate = (id: string) =>
 
 export const certificateLabel = (
   certificate: (typeof documentDocs)[number],
-  isGerman: boolean,
-) => `${isGerman ? certificate.titleGerman : certificate.title}.pdf`;
+  language: Language,
+) => `${localized(certificate, "title", language)}.pdf`;
 
 const LABELS = {
   english: { download: "Download", openDrive: "Open in Drive", loading: "Loading…", failed: "The preview could not load.", page: "Page" },
   german: { download: "Herunterladen", openDrive: "In Drive öffnen", loading: "Wird geladen…", failed: "Die Vorschau konnte nicht geladen werden.", page: "Seite" },
+  spanish: { download: "Descargar", openDrive: "Abrir en Drive", loading: "Cargando…", failed: "No se ha podido cargar la vista previa.", page: "Página" },
 } as const;
 
 // Renders every page of a PDF to canvases with pdf.js, so the CV looks the same in
@@ -100,7 +102,6 @@ function PdfPages({ src, labels }: { src: string; labels: (typeof LABELS)[keyof 
 export default function PreviewDocument({ doc }: { doc: PreviewDoc }) {
   const language = useLanguageStore((state) => state.language);
   const labels = LABELS[language];
-  const isGerman = language === "german";
 
   if (doc.kind === "cv") {
     return (
@@ -128,7 +129,7 @@ export default function PreviewDocument({ doc }: { doc: PreviewDoc }) {
     <div className="preview-doc">
       <div className="preview-toolbar">
         <span>
-          {isGerman ? certificate.issuerGerman : certificate.issuer} · {certificate.date}
+          {localized(certificate, "issuer", language)} · {certificate.date}
         </span>
         <a
           href={certificate.driveUrl}
@@ -142,7 +143,7 @@ export default function PreviewDocument({ doc }: { doc: PreviewDoc }) {
       <iframe
         className="preview-frame"
         src={certificate.previewUrl}
-        title={certificateLabel(certificate, isGerman)}
+        title={certificateLabel(certificate, language)}
         allow="autoplay"
       />
     </div>

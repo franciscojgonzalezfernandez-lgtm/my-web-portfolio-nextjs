@@ -366,3 +366,18 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
   - [x] `public/CV-Javi.pdf` sustituido por el CV nuevo (Lead Software Engineer AI)
   - [x] `tsc`, `lint`, `build` y navegador (1280×800 y 375×812, DE)
 - Notas: fecha y emisor de la Arbeitsbestätigung pendientes del owner (`data/certifications.data.ts`). Clave de posiciones del escritorio subida a `v3` para que todos vean el nuevo orden.
+
+## f-028 — Español como tercer idioma
+
+- Estado: review · Prioridad: P1
+- Depende de: f-027
+- AC:
+  - [x] `Language = "english" | "german" | "spanish"` en `stores/useLanguageStore.ts` (default sigue siendo alemán)
+  - [x] `lib/i18n.ts`: `localized(item, key, language)` lee `key` / `keyGerman` / `keySpanish`; `byLanguage()` para copy inline; `HTML_LANG` y `DATE_LOCALE` (`es-ES`)
+  - [x] Campos `*Spanish` en interfaces y en todo `data/` (proyectos, experiencias, about, métricas, arquitecturas, certificaciones)
+  - [x] Chrome del OS en español (`os-i18n.ts`): menu bar, Dock, carpetas, nombres de apps, tipos de proyecto, fechas
+  - [x] Selectores: menu bar 🌐 (EN/DE/ES), Ajustes del Sistema, tile de Control Center (cicla EN→DE→ES), Terminal `lang en|de|es`
+  - [x] Apps propias traducidas: Notas (incl. Aficiones), proyecto, Preview, Mail, Monitor de Actividad, Freeform, Acerca de este Mac, Ajustes
+  - [x] Corregida la comilla suelta al inicio de la descripción de Trading Algorithm (EN/DE)
+  - [x] `tsc`, `lint`, `build` y navegador (1280×800 y 375×812, ES)
+- Notas: las apps de Asier (Weather, ChatGPT, Instagram, Facebook, Paint, YouTube, Spotify) siguen en inglés en los tres idiomas, como antes en alemán.
