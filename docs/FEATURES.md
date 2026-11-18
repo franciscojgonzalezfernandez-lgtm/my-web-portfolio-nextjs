@@ -250,12 +250,13 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-018 — Mail (contacto) + apps de redes
 
-- Estado: backlog · Prioridad: P2
+- Estado: review · Prioridad: P2
 - Depende de: f-013
 - AC:
-  - [ ] Mail portado: compose con To de Javi, asunto/cuerpo editables, Send abre `mailto:`; CV adjunto descargable
-  - [ ] Iconos LinkedIn y GitHub abren el perfil en pestaña nueva con `trackExternalClick`
-  - [ ] Gates de f-013
+  - [x] Mail portado: compose con To de Javi, asunto/cuerpo editables, Send abre `mailto:`; CV adjunto descargable
+  - [x] Iconos LinkedIn y GitHub abren el perfil en pestaña nueva con `trackExternalClick`
+  - [x] Gates de f-013
+- Notas: Mail traducido EN/DE; Send dispara `contact_email` (vía `trackEvent`) antes de abrir `mailto:`; el adjunto CV dispara `trackCvDownload`. Todos los iconos con `href` (LinkedIn, GitHub) disparan `trackExternalClick(name, "desktop")`, también desde la home de iOS.
 
 ## f-019 — YouTube + Spotify
 
