@@ -72,6 +72,12 @@ import ProjectDocument from "./project-window";
 import MoviePlayer, { INTRO_MOVIE } from "./movie-window";
 import Terminal, { type TerminalTarget } from "./terminal";
 import { AboutThisMac, ActivityMonitor, FreeformBoard } from "./system-apps";
+import SettingsApp, {
+  isWallpaperId,
+  WALLPAPER_STORAGE_KEY,
+  WALLPAPERS,
+  type WallpaperId,
+} from "./settings-app";
 import PreviewDocument, {
   certificateDocs,
   certificateLabel,
@@ -122,6 +128,7 @@ const apps = [
     icon: "/os/doc-icons/activity-monitor.svg",
   },
   { id: "freeform", name: "Freeform", icon: "/os/doc-icons/freeform.svg" },
+  { id: "settings", name: "Settings", icon: "/os/doc-icons/settings.svg" },
   { id: "weather", name: "Weather", icon: "/os/doc-icons/weather.svg" },
   { id: "chatgpt", name: "ChatGPT", icon: "/os/doc-icons/chatgpt.svg" },
   {
@@ -153,7 +160,7 @@ const isMobileDockApp = (
 type LinkedAppId = Extract<DockApp, { href: string }>["id"];
 type WindowAppId = Exclude<
   AppId,
-  LinkedAppId | "notes" | "spotify" | "youtube" | "weather" | "terminal"
+  LinkedAppId | "notes" | "spotify" | "youtube" | "weather" | "terminal" | "settings"
 >;
 type NotesTarget = { noteId: string; view?: NotesView };
 type WindowState =
@@ -165,6 +172,7 @@ type WindowState =
   | { kind: "movie" }
   | { kind: "terminal" }
   | { kind: "about-mac" }
+  | { kind: "settings" }
   | { kind: "video" }
   | { kind: "spotify" }
   | { kind: "youtube" }
@@ -200,6 +208,7 @@ const windowKey = (content: WindowState) => {
   if (content.kind === "movie") return "movie";
   if (content.kind === "terminal") return "terminal";
   if (content.kind === "about-mac") return "about-mac";
+  if (content.kind === "settings") return "settings";
   if (content.kind === "preview")
     return content.doc.kind === "cv" ? "preview:cv" : `preview:cert:${content.doc.id}`;
   if (content.kind === "image") return `image:${content.memeId}`;
@@ -1272,6 +1281,7 @@ const ICON_PLATE: Record<AppId, number> = {
   terminal: 1,
   "activity-monitor": 1,
   freeform: 1,
+  settings: 1,
   trash: 862 / 1024,
 };
 
@@ -3336,6 +3346,33 @@ const ControlToggle = ({
   </button>
 );
 
+const subscribeNever = () => () => {};
+
+// Control Center tile that flips the site language between EN and DE.
+const LanguageTile = ({ className, compact = false }: { className: string; compact?: boolean }) => {
+  const storedLanguage = useLanguageStore((state) => state.language);
+  const setLanguage = useLanguageStore((state) => state.setLanguage);
+  // sessionStorage is unknown to the static HTML; render the default until hydrated.
+  const isHydrated = useSyncExternalStore(subscribeNever, () => true, () => false);
+  const language = isHydrated ? storedLanguage : "german";
+  const code = language === "german" ? "DE" : "EN";
+  const title = language === "german" ? "Sprache" : "Language";
+  return (
+    <button
+      type="button"
+      className={`cc-toggle ${className}`}
+      aria-label={`${title}: ${code}. Switch to ${language === "german" ? "English" : "Deutsch"}`}
+      aria-pressed
+      onClick={() => setLanguage(language === "german" ? "english" : "german")}
+    >
+      <span className="cc-toggle-icon">
+        <span className="cc-language-value">{code}</span>
+      </span>
+      {compact ? null : <small>{title}</small>}
+    </button>
+  );
+};
+
 const ToggleText = ({ title, status }: { title: string; status?: string }) => (
   <span className="cc-text">
     <b>{title}</b>
@@ -3650,15 +3687,7 @@ const DesktopControlCenter = ({
               status={controls.toggles.focus ? "Do Not Disturb" : undefined}
             />
           </ControlToggle>
-          <ControlToggle
-            id="stageManager"
-            label="Stage Manager"
-            icon="stageManager"
-            controls={controls}
-            className="cc-tile cc-module cc-square"
-          >
-            <small>Stage Manager</small>
-          </ControlToggle>
+          <LanguageTile className="cc-tile cc-module cc-square" />
           <ControlToggle
             id="mirroring"
             label="Screen Mirroring"
@@ -4168,14 +4197,7 @@ const MobileControlCenter = ({ controls }: { controls: ControlCenterState }) => 
               className="cc-tile cc-icon-tile"
               filled
             />
-            <ControlToggle
-              id="mirroring"
-              label="Screen Mirroring"
-              icon="mirroring"
-              controls={controls}
-              className="cc-tile cc-icon-tile"
-              filled
-            />
+            <LanguageTile className="cc-tile cc-icon-tile" compact />
             <ControlSlider
               label="Brightness"
               icon="sun"
@@ -6414,6 +6436,9 @@ const describeMinimizedWindow = (item: OpenWindow): MinimizedWindowTile => {
       variant: "paper",
     };
   }
+  if (content.kind === "settings") {
+    return { id, label: "System Settings", icon: "/os/doc-icons/settings.svg", variant: "paper" };
+  }
   if (content.kind === "about-mac") {
     return { id, label: "About This Mac", variant: "paper" };
   }
@@ -6619,6 +6644,24 @@ export default function Home() {
   usePreventBrowserZoom();
   useTypingViewport();
   const [openWindows, setOpenWindows] = useState<OpenWindow[]>([]);
+  const [wallpaper, setWallpaper] = useState<WallpaperId>("default");
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(WALLPAPER_STORAGE_KEY);
+      if (isWallpaperId(stored)) setWallpaper(stored);
+    } catch {
+      // Storage can be blocked; keep the default wallpaper.
+    }
+  }, []);
+  const handleWallpaperChange = (id: WallpaperId) => {
+    setWallpaper(id);
+    try {
+      localStorage.setItem(WALLPAPER_STORAGE_KEY, id);
+    } catch {
+      // Ignore: the choice still applies for this visit.
+    }
+  };
+  const wallpaperCss = WALLPAPERS.find((option) => option.id === wallpaper)?.css;
   const [selected, setSelected] = useState<string | null>(null);
   const desktopFilesRef = useRef<HTMLDivElement>(null);
   const [desktopSize, setDesktopSize] = useState<DesktopSize | null>(null);
@@ -6912,6 +6955,10 @@ export default function Home() {
       addWindow({ kind: "terminal" });
       return;
     }
+    if (app.id === "settings") {
+      addWindow({ kind: "settings" });
+      return;
+    }
     if (app.id === "spotify") {
       openSpotify();
       return;
@@ -7014,6 +7061,7 @@ export default function Home() {
     <main
       className={desktopClassName}
       aria-label="Javi — interactive desktop portfolio"
+      style={wallpaperCss ? ({ "--wallpaper": wallpaperCss } as React.CSSProperties) : undefined}
       onPointerDownCapture={handlePointerDownCapture}
       onClick={(event) => {
         const target = event.target as HTMLElement;
@@ -7317,6 +7365,12 @@ export default function Home() {
               onOpenPreview={openPreview}
               {...stackProps}
             />
+          );
+        if (window.content.kind === "settings")
+          return (
+            <WindowShell key={window.id} title="System Settings" onClose={onClose} {...stackProps}>
+              <SettingsApp wallpaper={wallpaper} onWallpaperChange={handleWallpaperChange} />
+            </WindowShell>
           );
         if (window.content.kind === "about-mac")
           return (

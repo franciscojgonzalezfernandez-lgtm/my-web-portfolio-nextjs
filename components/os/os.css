@@ -69,7 +69,7 @@ body {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background-image: url("/os/wallpaper.jpg");
+  background-image: var(--wallpaper, url("/os/wallpaper.jpg"));
   background-size: cover;
   background-position: center;
   isolation: isolate;
@@ -3616,7 +3616,7 @@ body {
   .desktop::after {
     background:
       linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent 25%, rgba(0, 0, 0, 0.25)),
-      url("/os/wallpaper.jpg") 51% center / cover no-repeat;
+      var(--wallpaper, url("/os/wallpaper.jpg")) 51% center / cover no-repeat;
   }
   .desktop::before {
     content: "";
