@@ -240,12 +240,13 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-017 — QuickTime (Intro.mov) + Photos
 
-- Estado: backlog · Prioridad: P2
+- Estado: review · Prioridad: P2
 - Depende de: f-013
 - AC:
-  - [ ] `Intro.mov` en el escritorio reproduce `portfolio-intro.webm` en un reproductor estilo QuickTime (eventos de `trackVideoEvent`)
-  - [ ] Photos portado con la galería de Javi (`CustomPhotoGallery` / datos de about) + álbum Memes
-  - [ ] Gates de f-013
+  - [x] `Intro.mov` en el escritorio reproduce `portfolio-intro.webm` en un reproductor estilo QuickTime (eventos de `trackVideoEvent`)
+  - [x] Photos portado con la galería de Javi (`CustomPhotoGallery` / datos de about) + álbum Memes
+  - [x] Gates de f-013
+- Notas: `components/os/movie-window.tsx` (QuickTime) usa `CustomVideo`, así que los eventos de vídeo salen solos; al darle a play pausa Spotify. Photos ahora lee `components/os/photo-library.ts` (álbumes Me, Work, Projects, Memes); en f-013 Photos apuntaba a las fotos de Instagram de Asier, que ya no se publican. **Pendiente owner:** pies de foto y fechas de las fotos personales son aproximados, revisarlos en `photo-library.ts`.
 
 ## f-018 — Mail (contacto) + apps de redes
 

@@ -64,6 +64,7 @@ import {
 import { projects as portfolioProjects } from "@/data/projects.data";
 import { trackProjectClick } from "@/lib/analytics";
 import ProjectDocument from "./project-window";
+import MoviePlayer, { INTRO_MOVIE } from "./movie-window";
 import PreviewDocument, {
   certificateDocs,
   certificateLabel,
@@ -146,6 +147,7 @@ type WindowState =
   | { kind: "folder"; folder: FolderId }
   | { kind: "project"; slug: string }
   | { kind: "preview"; doc: PreviewDoc }
+  | { kind: "movie" }
   | { kind: "video" }
   | { kind: "spotify" }
   | { kind: "youtube" }
@@ -178,6 +180,7 @@ export const readDeepLink = (search: string): DeepLinkTarget | null => {
 const windowKey = (content: WindowState) => {
   if (content.kind === "folder") return content.folder === "secret" ? null : `folder:${content.folder}`;
   if (content.kind === "project") return `project:${content.slug}`;
+  if (content.kind === "movie") return "movie";
   if (content.kind === "preview")
     return content.doc.kind === "cv" ? "preview:cv" : `preview:cert:${content.doc.id}`;
   if (content.kind === "image") return `image:${content.memeId}`;
@@ -4176,7 +4179,12 @@ const DESKTOP_WIDGET_HEIGHT = 166;
 const DESKTOP_WIDGET_GAP = 16;
 const SPOTIFY_WIDGET_LAYOUT_KEY = "javi-os-spotify-widget-layout";
 const SPOTIFY_WIDGET_LAYOUT = "square-below-weather";
-const FIXED_DESKTOP_ICON_IDS = ["projects-folder", "certifications-folder", "cv-pdf"] as const;
+const FIXED_DESKTOP_ICON_IDS = [
+  "projects-folder",
+  "certifications-folder",
+  "cv-pdf",
+  "intro-mov",
+] as const;
 const STRAY_ICON_ID = "folder";
 const STRAY_ICON_ANCHOR = { x: 0.21, y: 0.64 };
 const FALLBACK_DESKTOP_SIZE: DesktopSize = { width: 1440, height: 872 };
@@ -6304,7 +6312,7 @@ const windowAppId = ({ content }: OpenWindow) => {
 const byMinimizeOrder = (first: OpenWindow, second: OpenWindow) =>
   (first.minimizedAt ?? 0) - (second.minimizedAt ?? 0);
 
-const DARK_SURFACE_IDS = new Set<string>(["spotify", "youtube", "instagram", "weather", "video"]);
+const DARK_SURFACE_IDS = new Set<string>(["spotify", "youtube", "instagram", "weather", "video", "movie"]);
 
 const describeMinimizedWindow = (item: OpenWindow): MinimizedWindowTile => {
   const { id, content } = item;
@@ -6316,6 +6324,9 @@ const describeMinimizedWindow = (item: OpenWindow): MinimizedWindowTile => {
       preview: project?.images[0],
       variant: "paper",
     };
+  }
+  if (content.kind === "movie") {
+    return { id, label: INTRO_MOVIE.label, preview: INTRO_MOVIE.poster, variant: "dark" };
   }
   if (content.kind === "preview") {
     const certificate = content.doc.kind === "certificate" ? findCertificate(content.doc.id) : null;
@@ -6732,6 +6743,14 @@ export default function Home() {
     setSelected("certifications-folder");
     addWindow({ kind: "folder", folder: "certifications" });
   };
+  const handleOpenIntroMovie = () => {
+    setSelected("intro-mov");
+    addWindow({ kind: "movie" });
+  };
+  const handleIntroMoviePlay = () => {
+    // One audible source at a time: the intro pauses the music.
+    if (spotify.isPlaying) spotify.togglePlay();
+  };
   const handleOpenCv = () => {
     setSelected("cv-pdf");
     openPreview({ kind: "cv" });
@@ -7004,6 +7023,17 @@ export default function Home() {
           onMove={handleMoveIcon}
         />
         <DesktopIcon
+          id="intro-mov"
+          label={INTRO_MOVIE.label}
+          icon={INTRO_MOVIE.poster}
+          variant="picture"
+          selected={selected === "intro-mov"}
+          position={positionFor(iconPositions, "intro-mov")}
+          onSelect={handleSelectIcon}
+          onOpen={handleOpenIntroMovie}
+          onMove={handleMoveIcon}
+        />
+        <DesktopIcon
           id="folder"
           label="Don't Open"
           selected={selected === "folder"}
@@ -7071,6 +7101,12 @@ export default function Home() {
               launcherKey="certifications-folder"
               icon="/os/doc-icons/folder.png"
               onOpen={handleOpenCertificationsFolder}
+            />
+            <MobileFolderLauncher
+              label={INTRO_MOVIE.label}
+              launcherKey="intro-mov"
+              icon={INTRO_MOVIE.poster}
+              onOpen={handleOpenIntroMovie}
             />
             <MobileFolderLauncher
               label={CV_LABEL}
@@ -7155,6 +7191,18 @@ export default function Home() {
               onOpenPreview={openPreview}
               {...stackProps}
             />
+          );
+        if (window.content.kind === "movie")
+          return (
+            <WindowShell
+              key={window.id}
+              title={INTRO_MOVIE.label}
+              onClose={onClose}
+              variant="dark"
+              {...stackProps}
+            >
+              <MoviePlayer onPlay={handleIntroMoviePlay} />
+            </WindowShell>
           );
         if (window.content.kind === "preview") {
           const { doc } = window.content;

@@ -311,3 +311,38 @@
     padding: 12px;
   }
 }
+
+/* f-017: QuickTime-style player for Intro.mov. */
+.movie-player {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  background: #000;
+}
+.movie-player video {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+.window-shell:has(.movie-player) .window-body {
+  display: flex;
+  overflow: hidden;
+  background: #000;
+}
+.window-shell:has(.movie-player) .window-body > .movie-player {
+  flex: 1;
+}
+@media (min-width: 701px) {
+  .window-shell:has(.movie-player) {
+    width: min(960px, calc(100vw - 80px));
+    height: min(calc((min(960px, 100vw - 80px)) * 0.5625 + 40px), 86vh);
+  }
+}
+@media (max-width: 700px) {
+  .movie-player {
+    padding-top: max(47px, env(safe-area-inset-top));
+  }
+}

@@ -24,9 +24,10 @@ import {
   type Post,
 } from "./instagram";
 import HomeIndicatorSpacer from "./home-indicator-spacer";
+import { photoIdsInAlbum } from "./photo-library";
 
 type Photo = Post & { takenAt: Date };
-type CollectionId = "library" | "favorites" | "switzerland" | "glaciers" | "night" | "iceland" | "madeira";
+type CollectionId = "library" | "favorites" | "me" | "work" | "projects" | "memes";
 type LibraryView = "years" | "months" | "all";
 type PhotoGroup = { key: string; label: string; photos: Photo[] };
 type Collection = { id: CollectionId; label: string; icon: PhotosIconName };
@@ -47,7 +48,7 @@ const MONTH_NAMES = [
 ];
 const ZOOM_COLUMNS = [9, 7, 5, 4, 3];
 const DEFAULT_ZOOM_LEVEL = 2;
-const INITIAL_FAVORITE_IDS = ["eclipse", "larches", "matterhorn-sunrise", "kirkjufell"];
+const INITIAL_FAVORITE_IDS = ["portrait-smiling", "telefonica-farewell", "adobe-experience-makers"];
 
 const TAKEN_AT_PATTERN = new RegExp(`^(${MONTH_NAMES.join("|")}) (\\d{1,2})(?:, (\\d{4}))?$`);
 
@@ -84,28 +85,10 @@ const requirePhotoIds = (ids: readonly string[]) => {
 };
 
 const albumPhotoIds: Record<Exclude<CollectionId, "library" | "favorites">, string[]> = {
-  switzerland: [
-    "ice-jump",
-    "glacier-lake",
-    "matterhorn-cave",
-    "fog-summit",
-    "seealpsee",
-    "milky-way",
-    "lake-ridge",
-    "larches",
-    "oeschinensee",
-    "hut-night",
-    "fog-sunset",
-    "sea-of-clouds",
-    "matterhorn-sunrise",
-    "alpenglow",
-    "ibex",
-    "prayer-flags",
-  ],
-  glaciers: ["glacier-lake", "ice-jump", "matterhorn-cave", "ice-cave", "glacier-ridge", "matterhorn-sunrise"],
-  night: ["eclipse", "milky-way", "hut-night"],
-  iceland: ["kirkjufell", "plane-wreck", "skogafoss"],
-  madeira: ["fanal", "sea-stack"],
+  me: photoIdsInAlbum("me"),
+  work: photoIdsInAlbum("work"),
+  projects: photoIdsInAlbum("projects"),
+  memes: photoIdsInAlbum("memes"),
 };
 
 requirePhotoIds(INITIAL_FAVORITE_IDS);
@@ -117,11 +100,10 @@ const libraryCollections: Collection[] = [
 ];
 
 const albumCollections: Collection[] = [
-  { id: "switzerland", label: "Switzerland", icon: "album" },
-  { id: "glaciers", label: "Glaciers", icon: "album" },
-  { id: "night", label: "Night Sky", icon: "album" },
-  { id: "iceland", label: "Iceland", icon: "album" },
-  { id: "madeira", label: "Madeira", icon: "album" },
+  { id: "me", label: "Me", icon: "album" },
+  { id: "work", label: "Work", icon: "album" },
+  { id: "projects", label: "Projects", icon: "album" },
+  { id: "memes", label: "Memes", icon: "album" },
 ];
 
 const allCollections = [...libraryCollections, ...albumCollections];
@@ -462,17 +444,17 @@ const LibraryFooter = ({ count }: { count: number }) => (
   <footer className="py-6 text-center text-xs text-[#8a8986]">
     <p className="font-semibold text-[#555]">{formatPhotoCount(count)}</p>
     <p className="mt-0.5">
-      Imported from{" "}
+      More on{" "}
       <a
         href={PROFILE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={`Open @${USERNAME} on Instagram, opens in a new tab`}
+        aria-label={`Open @${USERNAME} on YouTube, opens in a new tab`}
         className={`${focusRing} rounded-sm text-[#0a84ff] hover:underline`}
       >
         @{USERNAME}
       </a>{" "}
-      on Instagram
+      on YouTube
     </p>
   </footer>
 );
@@ -585,8 +567,6 @@ const PhotoViewer = ({
     { label: "Date", value: formatDay(photo.takenAt) },
     { label: "Location", value: photo.location },
     { label: "Dimensions", value: `${photo.width} × ${photo.height}` },
-    { label: "Likes", value: formatCount(photo.likes) },
-    { label: "Comments", value: formatCount(photo.commentCount) },
   ];
 
   return (
@@ -651,10 +631,10 @@ const PhotoViewer = ({
               href={PROFILE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="View on Instagram, opens in a new tab"
+              aria-label="Open Javi's YouTube channel, opens in a new tab"
               className={`${focusRing} mt-4 inline-block rounded-sm text-xs font-medium text-[#0a84ff] hover:underline`}
             >
-              View on Instagram
+              More on YouTube
             </a>
           </aside>
         )}
