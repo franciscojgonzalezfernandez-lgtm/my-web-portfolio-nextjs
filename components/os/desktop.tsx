@@ -97,7 +97,17 @@ import {
   type NoteFolder,
 } from "./notes-data";
 import { useLanguageStore } from "@/stores/useLanguageStore";
-import { appName, osChrome, useOsChrome, useOsLanguage, projectTypeLabel } from "./os-i18n";
+import {
+  appName,
+  LANGUAGE_OPTIONS,
+  languageOption,
+  osChrome,
+  projectTypeLabel,
+  useOsChrome,
+  useOsLanguage,
+  type OsLanguage,
+} from "./os-i18n";
+import { HTML_LANG, localized } from "@/lib/i18n";
 
 type Project = {
   id: string;
@@ -1566,6 +1576,15 @@ const MAIL_LABELS = {
     attachment: "Anhang",
     attachmentHint: "Meinen Lebenslauf herunterladen",
   },
+  spanish: {
+    to: "Para:",
+    subject: "Asunto:",
+    subjectDefault: "Oferta de trabajo",
+    greeting: "Hola, Javi:",
+    send: "Enviar",
+    attachment: "Adjunto",
+    attachmentHint: "Descargar mi CV",
+  },
 } as const;
 
 // Contact form. No backend: Send hands the draft to the visitor's mail client.
@@ -1724,7 +1743,7 @@ function AppWindow({
 }
 
 const PDF_ICON = "/os/doc-icons/pdf.svg";
-const folderTitle = (folder: FolderId, language: "english" | "german") => {
+const folderTitle = (folder: FolderId, language: OsLanguage) => {
   const chrome = osChrome(language);
   if (folder === "projects") return chrome.projects;
   if (folder === "certifications") return chrome.certifications;
@@ -1758,7 +1777,6 @@ function FolderWindow({
   onOpenProject: (slug: string) => void;
   onOpenPreview: (doc: PreviewDoc) => void;
 } & WindowStackProps) {
-  const isGerman = useLanguageStore((state) => state.language) === "german";
   const folderLanguage = useOsLanguage();
   const title = folderTitle(folder, folderLanguage);
   const items: FolderItem[] =
@@ -1773,7 +1791,7 @@ function FolderWindow({
       : folder === "certifications" || folder === "references"
         ? (folder === "references" ? referenceDocs : certificateDocs).map((certificate) => ({
             id: certificate.id,
-            label: certificateLabel(certificate, isGerman),
+            label: certificateLabel(certificate, folderLanguage),
             meta: certificate.date || undefined,
             thumbnail: PDF_ICON,
             isFileIcon: true,
@@ -3454,22 +3472,23 @@ const ControlToggle = ({
 
 const subscribeNever = () => () => {};
 
-// Control Center tile that flips the site language between EN and DE.
+// Control Center tile that cycles the site language: EN → DE → ES.
 const LanguageTile = ({ className, compact = false }: { className: string; compact?: boolean }) => {
   const storedLanguage = useLanguageStore((state) => state.language);
   const setLanguage = useLanguageStore((state) => state.setLanguage);
   // sessionStorage is unknown to the static HTML; render the default until hydrated.
   const isHydrated = useSyncExternalStore(subscribeNever, () => true, () => false);
   const language = isHydrated ? storedLanguage : "german";
-  const code = language === "german" ? "DE" : "EN";
-  const title = language === "german" ? "Sprache" : "Language";
+  const { code, title } = languageOption(language);
+  const nextIndex = (LANGUAGE_OPTIONS.findIndex((option) => option.id === language) + 1) % LANGUAGE_OPTIONS.length;
+  const next = LANGUAGE_OPTIONS[nextIndex];
   return (
     <button
       type="button"
       className={`cc-toggle ${className}`}
-      aria-label={`${title}: ${code}. Switch to ${language === "german" ? "English" : "Deutsch"}`}
+      aria-label={`${title}: ${code}. Switch to ${next.native}`}
       aria-pressed
-      onClick={() => setLanguage(language === "german" ? "english" : "german")}
+      onClick={() => setLanguage(next.id)}
     >
       <span className="cc-toggle-icon">
         <span className="cc-language-value">{code}</span>
@@ -6578,7 +6597,7 @@ const routeForWindow = (content: WindowState): string => {
 
 const describeMinimizedWindow = (
   item: OpenWindow,
-  language: "english" | "german",
+  language: OsLanguage,
 ): MinimizedWindowTile => {
   const { id, content } = item;
   if (content.kind === "project") {
@@ -6606,7 +6625,7 @@ const describeMinimizedWindow = (
     const certificate = content.doc.kind === "certificate" ? findCertificate(content.doc.id) : null;
     return {
       id,
-      label: certificate ? certificateLabel(certificate, false) : CV_LABEL,
+      label: certificate ? certificateLabel(certificate, "english") : CV_LABEL,
       icon: PDF_ICON,
       variant: "paper",
     };
@@ -6802,7 +6821,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
   const osLanguage = useOsLanguage();
   const chrome = useOsChrome();
   useEffect(() => {
-    document.documentElement.lang = osLanguage === "german" ? "de" : "en";
+    document.documentElement.lang = HTML_LANG[osLanguage];
   }, [osLanguage]);
   const [wallpaper, setWallpaper] = useState<WallpaperId>("default");
   useEffect(() => {
@@ -7605,7 +7624,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
           return (
             <WindowShell
               key={window.id}
-              title={certificate ? certificateLabel(certificate, false) : CV_LABEL}
+              title={certificate ? certificateLabel(certificate, osLanguage) : CV_LABEL}
               onClose={onClose}
               {...stackProps}
             >
@@ -7618,7 +7637,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
           const project = portfolioProjects.find((entry) => entry.slug === slug);
           if (!project) return null;
           return (
-            <WindowShell key={window.id} title={osLanguage === "german" ? project.titleGerman : project.title} onClose={onClose} {...stackProps}>
+            <WindowShell key={window.id} title={localized(project, "title", osLanguage)} onClose={onClose} {...stackProps}>
               <ProjectDocument project={project} />
             </WindowShell>
           );

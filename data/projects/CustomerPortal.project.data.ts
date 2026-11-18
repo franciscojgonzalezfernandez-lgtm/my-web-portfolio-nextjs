@@ -4,11 +4,14 @@ export const CUSTOMER_PORTAL: Project = {
   slug: "customer-portal",
   title: "Customer Portal for Movistar Clients",
   titleGerman: "Kundenportal für Movistar-Kunden",
+  titleSpanish: "Portal de cliente para clientes de Movistar",
   projectType: "Professional",
   description:
     "The management portal for Movistar customers. Responsive and embedded within the MiMovistar application. And much more. See the details!",
   descriptionGerman:
     "Das Verwaltungsportal für Movistar-Kunden. Responsiv und eingebettet in die MiMovistar-Anwendung. Und vieles mehr. Details ansehen!",
+  descriptionSpanish:
+    "El portal de gestión para clientes de Movistar. Responsive e integrado dentro de la app MiMovistar. Y mucho más. ¡Echa un vistazo a los detalles!",
   images: [
     "/miMovistar-cover.webp",
     "/TCOL-environments.webp",
@@ -49,6 +52,16 @@ export const CUSTOMER_PORTAL: Project = {
     Die Iterationen waren besonders herausfordernd aufgrund der Lücke zwischen UX-Erwartungen und Backend-Beschränkungen. Meine Rolle bestand darin, zwischen beiden Teams zu vermitteln und machbare Lösungen zu finden, die Produktkonsistenz aufrechterhielten und echte Kundenbedürfnisse adressierten.
 
     Schließlich arbeiteten wir mit dem Infrastrukturteam zusammen, um die Server angemessen zu dimensionieren und bereitzustellen, und entschieden uns für eine On-Premise-Deployment aufgrund der Sensibilität der involvierten Daten. Der CI/CD-Aufbau war ebenfalls komplex, da er Authentifizierung gegenüber On-Premise-Maschinen und die Verwendung interner Unternehmenszertifikate für sichere Deployment-Pipelines erforderte.
+    `,
+  fullDescriptionSpanish: `Este proyecto fue una de las iniciativas de innovación clave de la compañía: el desarrollo del área privada para todos los clientes de la TELCO tras varias fusiones corporativas. El principal reto era unificar los datos de cliente procedentes de múltiples sistemas legacy y bases de datos, lo que exigió un trabajo intenso de normalización e integración.
+
+    Diseñamos una capa de API middleware para estandarizar la información y definir un modelo de cliente común. Participé directamente en el diseño y la definición del contrato de la API, trabajando de forma iterativa con el equipo de backend para garantizar la consistencia, la seguridad y la escalabilidad.
+
+    En paralelo, co-lideré el desarrollo de la primera aplicación React de la compañía. Trabajamos codo con codo con los equipos de UX y UI para definir el design system desde cero, validando prototipos en Figma y Adobe XD y realizando auditorías de accesibilidad con Applause.
+
+    Las iteraciones fueron especialmente complicadas por la distancia entre las expectativas de UX y las limitaciones del backend. Mi papel fue mediar entre ambos equipos y encontrar soluciones viables que mantuvieran la coherencia del producto y respondieran a las necesidades reales del cliente.
+
+    Por último, trabajamos con el equipo de infraestructura para dimensionar y aprovisionar correctamente los servidores, optando por un despliegue on-premise dada la sensibilidad de los datos. La configuración de CI/CD también fue compleja, ya que requería autenticarse contra máquinas on-premise y usar los certificados internos de la compañía para que los pipelines de despliegue fueran seguros.
     `,
   videoUrl: "tcol.webm",
   releaseDate: "16-07-2021",

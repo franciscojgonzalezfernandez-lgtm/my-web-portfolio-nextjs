@@ -1,9 +1,26 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { useLanguageStore } from "@/stores/useLanguageStore";
+import { DATE_LOCALE } from "@/lib/i18n";
+import { useLanguageStore, type Language } from "@/stores/useLanguageStore";
 
-export type OsLanguage = "english" | "german";
+export type OsLanguage = Language;
+
+// The language switchers (menu bar, Settings, Control Center, Terminal) list these.
+export const LANGUAGE_OPTIONS: ReadonlyArray<{
+  id: Language;
+  code: string;
+  native: string;
+  // "Language" written in that language, for titles while it is active.
+  title: string;
+}> = [
+  { id: "english", code: "EN", native: "English", title: "Language" },
+  { id: "german", code: "DE", native: "Deutsch", title: "Sprache" },
+  { id: "spanish", code: "ES", native: "Español", title: "Idioma" },
+];
+
+export const languageOption = (language: Language) =>
+  LANGUAGE_OPTIONS.find((option) => option.id === language) ?? LANGUAGE_OPTIONS[0];
 
 const subscribeNever = () => () => {};
 
@@ -16,17 +33,28 @@ export const useOsLanguage = (): OsLanguage => {
 };
 
 // App names as macOS shows them in each language. Brand names stay as they are.
-const APP_NAMES_DE: Record<string, string> = {
-  notes: "Notizen",
-  photos: "Fotos",
-  "activity-monitor": "Aktivitätsanzeige",
-  settings: "Systemeinstellungen",
-  weather: "Wetter",
-  trash: "Papierkorb",
+const APP_NAMES: Record<Exclude<OsLanguage, "english">, Record<string, string>> = {
+  german: {
+    notes: "Notizen",
+    photos: "Fotos",
+    "activity-monitor": "Aktivitätsanzeige",
+    settings: "Systemeinstellungen",
+    weather: "Wetter",
+    trash: "Papierkorb",
+  },
+  spanish: {
+    notes: "Notas",
+    photos: "Fotos",
+    "activity-monitor": "Monitor de Actividad",
+    settings: "Ajustes del Sistema",
+    weather: "Tiempo",
+    trash: "Papelera",
+    mail: "Mail",
+  },
 };
 
 export const appName = (id: string, name: string, language: OsLanguage) =>
-  language === "german" ? (APP_NAMES_DE[id] ?? name) : name;
+  language === "english" ? name : (APP_NAMES[language][id] ?? name);
 
 const CHROME = {
   english: {
@@ -75,6 +103,29 @@ const CHROME = {
     items: (count: number) => `${count} ${count === 1 ? "Objekt" : "Objekte"}`,
     close: "Schließen",
   },
+  spanish: {
+    file: "Archivo",
+    edit: "Edición",
+    view: "Visualización",
+    window: "Ventana",
+    help: "Ayuda",
+    projects: "Proyectos",
+    certifications: "Mis certificaciones",
+    certificationsShort: "Certificaciones",
+    references: "Referencias",
+    aboutMe: "Sobre mí",
+    watchFirst: "Míralo primero",
+    introInSecret: "El vídeo que deberías ver",
+    secret: "No abrir",
+    newMessage: "Nuevo mensaje",
+    trash: "Papelera",
+    trashEmpty: "La Papelera está vacía",
+    trashHint: "Aquí no hay nada que ver.",
+    aboutThisMac: "Acerca de este Mac",
+    systemSettings: "Ajustes del Sistema",
+    items: (count: number) => `${count} ${count === 1 ? "elemento" : "elementos"}`,
+    close: "Cerrar",
+  },
 } as const;
 
 export type OsChrome = (typeof CHROME)[OsLanguage];
@@ -82,21 +133,20 @@ export type OsChrome = (typeof CHROME)[OsLanguage];
 export const useOsChrome = (): OsChrome => CHROME[useOsLanguage()];
 export const osChrome = (language: OsLanguage): OsChrome => CHROME[language];
 
-const PROJECT_TYPES_DE: Record<string, string> = {
-  Professional: "Beruflich",
-  "Side Project": "Nebenprojekt",
-  Didactic: "Lernprojekt",
+const PROJECT_TYPES: Record<Exclude<OsLanguage, "english">, Record<string, string>> = {
+  german: { Professional: "Beruflich", "Side Project": "Nebenprojekt", Didactic: "Lernprojekt" },
+  spanish: { Professional: "Profesional", "Side Project": "Proyecto personal", Didactic: "Didáctico" },
 };
 
 export const projectTypeLabel = (type: string, language: OsLanguage) =>
-  language === "german" ? (PROJECT_TYPES_DE[type] ?? type) : type;
+  language === "english" ? type : (PROJECT_TYPES[language][type] ?? type);
 
 // data/projects stores dates as DD-MM-YYYY.
 export const formatProjectDate = (value: string, language: OsLanguage) => {
   const [day, month, year] = value.split("-").map(Number);
   if (!day || !month || !year) return value;
   return new Date(year, month - 1, day).toLocaleDateString(
-    language === "german" ? "de-CH" : "en-GB",
+    DATE_LOCALE[language],
     { day: "numeric", month: "long", year: "numeric" },
   );
 };

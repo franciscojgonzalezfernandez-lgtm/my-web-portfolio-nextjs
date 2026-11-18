@@ -4,11 +4,14 @@ export const ECOMMERCE_PLATFORM: Project = {
   slug: "ecommerce-platform",
   title: "Full Stack E-commerce Platform",
   titleGerman: "Full-Stack E-Commerce-Plattform",
+  titleSpanish: "Plataforma de e-commerce full stack",
   projectType: "Side Project",
   description:
     "Full-featured e-commerce platform with shopping cart and payment gateway integration.",
   descriptionGerman:
     "Voll ausgestattete E-Commerce-Plattform mit Warenkorb und Payment-Gateway-Integration.",
+  descriptionSpanish:
+    "Plataforma de e-commerce completa, con carrito de la compra e integración con pasarela de pago.",
   images: [
     "/ecommerce-1.png",
     "/ecommerce-architecture.webp",
@@ -87,6 +90,31 @@ export const ECOMMERCE_PLATFORM: Project = {
     ✅ Responsive Design + WCAG-konforme Barrierefreiheit
     ✅ Optimierte Performance + SEO-ready
     ✅ Skalierbare Architektur für zukünftiges Wachstum`,
+  fullDescriptionSpanish: `<strong>Plataforma de e-commerce completa</strong> desarrollada <strong>100% por mi cuenta</strong> —frontend con V0 + refinamiento manual, <strong>APIs de backend propias</strong> y <strong>base de datos</strong> desde cero—, que demuestra capacidades full stack de principio a fin.
+
+
+    <h3 className="text-xl"><strong>Mi papel</strong></h3>
+    - <strong>Desarrollo 100% autónomo</strong>, del diseño al deploy
+    - <strong>Arquitectura completa</strong>: Frontend (V0 + React) + APIs de backend + base de datos
+    - <strong>Generación de UI con V0</strong> + refinamiento manual de los componentes críticos
+    - Optimización de rendimiento + diseño responsive + accesibilidad
+    - Gestión de productos + autenticación completa
+
+
+    <h3 className="text-xl"><strong>Retos resueltos</strong></h3>
+    - <strong>Generación rápida de UI</strong> sin renunciar a una calidad profesional con V0
+    - <strong>Separación de responsabilidades</strong> + encapsulación de la lógica entre componentes autogenerados
+    - Arquitectura escalable para crecer en productos y clientes
+    - Rendimiento optimizado para e-commerce (imágenes, lazy loading, SEO)
+    - Seguridad: autenticación, protección de datos sensibles, validaciones
+
+
+    <h3 className="text-xl"><strong>Resultados</strong></h3>
+    ✅ Plataforma de <strong>e-commerce 100% funcional</strong> y lista para producción
+    ✅ <strong>Desarrollo ultrarrápido</strong> con V0 + refinamiento experto
+    ✅ Diseño responsive + accesibilidad conforme a WCAG
+    ✅ Rendimiento optimizado + preparada para SEO
+    ✅ Arquitectura escalable para el crecimiento futuro`,
   videoUrl: "/e-commerce.webm",
   externalUrl:
     "https://franciscojgonzalezfernandez-lgtm.github.io/minimalist-e-commerce/",

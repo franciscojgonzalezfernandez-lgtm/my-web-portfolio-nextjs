@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLanguageStore } from "@/stores/useLanguageStore";
+import { LANGUAGE_OPTIONS } from "./os-i18n";
 import { AboutThisMac } from "./system-apps";
 
 export type WallpaperId = "default" | "sequoia" | "graphite";
@@ -30,6 +31,7 @@ type Pane = "language" | "wallpaper" | "about";
 const COPY = {
   english: {
     search: "Search",
+    back: "Settings",
     language: "Language & Region",
     wallpaper: "Wallpaper",
     about: "About",
@@ -41,6 +43,7 @@ const COPY = {
   },
   german: {
     search: "Suchen",
+    back: "Einstellungen",
     language: "Sprache & Region",
     wallpaper: "Hintergrundbild",
     about: "Info",
@@ -49,6 +52,18 @@ const COPY = {
     current: "Aktuell",
     wallpaperLead: "Wähle ein Schreibtischbild.",
     account: "Apple Account",
+  },
+  spanish: {
+    search: "Buscar",
+    back: "Ajustes",
+    language: "Idioma y región",
+    wallpaper: "Fondo de pantalla",
+    about: "Información",
+    languageLead: "Elige el idioma de esta web. Todas las ventanas, notas y proyectos cambian al momento.",
+    preferred: "Idioma preferido",
+    current: "Actual",
+    wallpaperLead: "Elige una imagen de escritorio.",
+    account: "Cuenta de Apple",
   },
 } as const;
 
@@ -108,7 +123,7 @@ export default function SettingsApp({
       </aside>
       <section className="settings-pane">
         <button type="button" className="settings-back" onClick={() => setMobileShowsPane(false)}>
-          ‹ Settings
+          ‹ {copy.back}
         </button>
         {pane === "language" && (
           <>
@@ -116,12 +131,7 @@ export default function SettingsApp({
             <p className="settings-lead">{copy.languageLead}</p>
             <div className="settings-group" role="radiogroup" aria-label={copy.preferred}>
               <small>{copy.preferred}</small>
-              {(
-                [
-                  ["english", "English", "EN"],
-                  ["german", "Deutsch", "DE"],
-                ] as const
-              ).map(([id, label, code]) => (
+              {LANGUAGE_OPTIONS.map(({ id, native: label, code }) => (
                 <button
                   key={id}
                   type="button"

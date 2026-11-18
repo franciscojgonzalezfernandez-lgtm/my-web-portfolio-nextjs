@@ -4,23 +4,24 @@ import parse from "html-react-parser";
 import { CustomImage } from "@/components/high-order-components/CustomImage";
 import { CustomVideo } from "@/components/high-order-components/CustomVideo";
 import type { Project } from "@/interfaces/project.interface";
+import { HTML_LANG, localized } from "@/lib/i18n";
 import { formatProjectDate, projectTypeLabel, useOsLanguage } from "./os-i18n";
 
 const LABELS = {
   english: { type: "Type", released: "Released", stack: "Stack", visit: "Visit site", code: "Source code", gallery: "Gallery" },
   german: { type: "Typ", released: "Veröffentlicht", stack: "Stack", visit: "Website öffnen", code: "Quellcode", gallery: "Galerie" },
+  spanish: { type: "Tipo", released: "Publicado", stack: "Stack", visit: "Visitar web", code: "Código fuente", gallery: "Galería" },
 } as const;
 
 // Project document shown inside a Finder-opened window (desktop) or a full-screen
 // app card (iOS). Content comes straight from data/projects/*.project.data.ts.
 export default function ProjectDocument({ project }: { project: Project }) {
   const language = useOsLanguage();
-  const isGerman = language === "german";
   const labels = LABELS[language];
   const [cover, ...gallery] = project.images;
 
   return (
-    <article className="project-doc" lang={isGerman ? "de" : "en"}>
+    <article className="project-doc" lang={HTML_LANG[language]}>
       <div className="project-doc-media">
         {project.videoUrl ? (
           <CustomVideo
@@ -44,9 +45,9 @@ export default function ProjectDocument({ project }: { project: Project }) {
           <span aria-hidden="true">·</span>
           <span>{labels.released}: {formatProjectDate(project.releaseDate, language)}</span>
         </p>
-        <h2>{isGerman ? project.titleGerman : project.title}</h2>
+        <h2>{localized(project, "title", language)}</h2>
         <p className="project-doc-lede">
-          {isGerman ? project.descriptionGerman : project.description}
+          {localized(project, "description", language)}
         </p>
         {(project.externalUrl || project.gitHubUrl) && (
           <div className="project-doc-links">
@@ -71,7 +72,7 @@ export default function ProjectDocument({ project }: { project: Project }) {
       </section>
 
       <div className="project-doc-body">
-        {parse(isGerman ? project.fullDescriptionGerman : project.fullDescription)}
+        {parse(localized(project, "fullDescription", language))}
       </div>
 
       {gallery.length > 0 && (

@@ -2,8 +2,8 @@ import { personal } from "@/data/aboutMe.personal.data";
 import { professional } from "@/data/aboutMe.professional.data";
 import { experiences } from "@/data/experiences.data";
 import { projects } from "@/data/projects.data";
-
-type Language = "english" | "german";
+import { localized } from "@/lib/i18n";
+import type { Language } from "@/stores/useLanguageStore";
 
 export type NoteLink = { label: string; url?: string; project?: string };
 export type Note = {
@@ -58,15 +58,26 @@ const HOBBIES = {
     bullets: ["Snowboarden (Lehrer am Flumserberg)", "Krafttraining", "Lesen", "Videoproduktion", "Podcasting"],
     channel: "Mein YouTube-Kanal",
   },
+  spanish: {
+    title: "Aficiones",
+    meta: "Lejos del teclado",
+    paragraphs: [
+      "El snowboard es donde recargo pilas. En invierno trabajo como profesor de snowboard en Flumserberg, enseñando trucos y técnica y compartiendo muchos buenos días en la montaña.",
+      "El entrenamiento de fuerza me mantiene sano, con energía y disciplinado: la misma constancia que llevo a la ingeniería.",
+      "Leo mucho y me encanta contar historias delante de la cámara: grabar y montar vídeos de snowboard y grabar pódcasts.",
+    ],
+    bullets: ["Snowboard (profesor en Flumserberg)", "Entrenamiento de fuerza", "Lectura", "Grabación y edición de vídeo", "Pódcasts"],
+    channel: "Mi canal de YouTube",
+  },
 } as const;
 
 const FOLDER_TITLES = {
   english: { about: "About me", experience: "Experience", hobbies: "Hobbies", projects: "Projects", professional: "Professional", personal: "Personal" },
   german: { about: "Über mich", experience: "Erfahrung", hobbies: "Hobbys", projects: "Projekte", professional: "Beruflich", personal: "Persönlich" },
+  spanish: { about: "Sobre mí", experience: "Experiencia", hobbies: "Aficiones", projects: "Proyectos", professional: "Profesional", personal: "Personal" },
 } as const;
 
 export const buildNoteFolders = (language: Language): NoteFolder[] => {
-  const isGerman = language === "german";
   const titles = FOLDER_TITLES[language];
   const hobbies = HOBBIES[language];
 
@@ -81,16 +92,16 @@ export const buildNoteFolders = (language: Language): NoteFolder[] => {
         {
           id: "professional",
           title: titles.professional,
-          meta: isGerman ? professional.titleGerman : professional.title,
-          paragraphs: isGerman ? professional.paragraphsGerman : professional.paragraphs,
-          bullets: skillBullets(isGerman ? professional.skillsGerman : professional.skills),
+          meta: localized(professional, "title", language),
+          paragraphs: localized(professional, "paragraphs", language),
+          bullets: skillBullets(localized(professional, "skills", language)),
         },
         {
           id: "personal",
           title: titles.personal,
-          meta: isGerman ? personal.titleGerman : personal.title,
-          paragraphs: isGerman ? personal.paragraphsGerman : personal.paragraphs,
-          bullets: skillBullets(isGerman ? personal.skillsGerman : personal.skills),
+          meta: localized(personal, "title", language),
+          paragraphs: localized(personal, "paragraphs", language),
+          bullets: skillBullets(localized(personal, "skills", language)),
           links: [{ label: hobbies.channel, url: YOUTUBE_CHANNEL_URL }],
         },
       ],
@@ -103,10 +114,10 @@ export const buildNoteFolders = (language: Language): NoteFolder[] => {
         title: experience.company,
         meta: experience.period,
         paragraphs: [
-          isGerman ? experience.roleGerman : experience.role,
-          isGerman ? experience.descriptionGerman : experience.description,
+          localized(experience, "role", language),
+          localized(experience, "description", language),
         ],
-        bullets: isGerman ? experience.achievementsGerman : experience.achievements,
+        bullets: localized(experience, "achievements", language),
         links: [
           ...(experience.companyLink
             ? [{ label: experience.company, url: experience.companyLink }]
@@ -114,7 +125,7 @@ export const buildNoteFolders = (language: Language): NoteFolder[] => {
           ...(experience.relatedProjects ?? []).map((related) => {
             const project = projectSlugFromUrl(related.url);
             return {
-              label: isGerman ? related.labelGerman : related.label,
+              label: localized(related, "label", language),
               ...(project ? { project } : { url: related.url }),
             };
           }),
@@ -140,10 +151,10 @@ export const buildNoteFolders = (language: Language): NoteFolder[] => {
       title: titles.projects,
       notes: projects.map((project) => ({
         id: `project-${project.slug}`,
-        title: isGerman ? project.titleGerman : project.title,
+        title: localized(project, "title", language),
         meta: project.projectType,
-        paragraphs: [isGerman ? project.descriptionGerman : project.description],
-        links: [{ label: isGerman ? project.titleGerman : project.title, project: project.slug }],
+        paragraphs: [localized(project, "description", language)],
+        links: [{ label: localized(project, "title", language), project: project.slug }],
         image: project.images[0],
       })),
     },

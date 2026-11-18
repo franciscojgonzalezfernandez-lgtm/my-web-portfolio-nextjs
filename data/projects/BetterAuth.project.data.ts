@@ -4,11 +4,14 @@ export const BETTER_AUTH_SHOWCASE: Project = {
   slug: "better-auth-boilerplate-and-tradeoffs",
   title: "Better Auth - Next.js Showcase",
   titleGerman: "Better Auth - Next.js Showcase",
+  titleSpanish: "Better Auth - Showcase en Next.js",
   projectType: "Didactic",
   description:
     "A production-grade Next.js 15 authentication boilerplate that teaches modern auth patterns through a side-by-side client vs server contrast.",
   descriptionGerman:
     "Ein produktionsreifes Next.js 15 Authentifizierungs-Boilerplate, das moderne Auth-Muster durch einen direkten Client-vs-Server-Vergleich vermittelt.",
+  descriptionSpanish:
+    "Un boilerplate de autenticación en Next.js 15 listo para producción que enseña patrones modernos de auth contrastando, lado a lado, el enfoque cliente frente al servidor.",
   images: [
     "/better-auth-cover.webp",
     "/better-auth-arch.webp",
@@ -96,6 +99,37 @@ export const BETTER_AUTH_SHOWCASE: Project = {
     ✅ <strong>Edge/Serverless-Datenbank-Muster</strong> mit Neons HTTP-Treiber + Prisma-Adapter
     ✅ <strong>Security-Bewusstsein</strong>: CVE-Behebung, Env-Validierung, kein clientseitiger Auth-Zustand
     ✅ <strong>Lehren durch Code</strong>: bewusste architektonische Kontraste, eingebettete Docs, MIT-lizenzierter wiederverwendbarer Seed`,
+  fullDescriptionSpanish: `<strong>Boilerplate didáctico open source</strong> construido de principio a fin para que los tradeoffs entre la autenticación en cliente y en servidor se entiendan de un vistazo: dos dashboards aparentemente idénticos, dos mecánicas completamente distintas.
+
+    <h3 className="text-xl"><strong>Mi rol</strong></h3>
+    - <strong>Autor único</strong>: arquitectura, código, schema, deploy y documentación
+    - Diseñé el <strong>contraste pedagógico</strong>: <code>useSession()</code> + <code>router.replace()</code> en cliente frente a <code>auth.api.getSession()</code> + la interrupción <code>unauthorized()</code> en servidor
+    - Conecté Prisma con Neon mediante el <strong>adaptador HTTP</strong> (<code>@prisma/adapter-neon</code>) para que sea compatible con Edge/serverless
+    - Implementé email/contraseña + OAuth de GitHub y Google con <strong>better-auth</strong>
+    - Añadí verificación de email con <strong>Resend</strong> y <code>autoSignInAfterVerification</code>
+    - Parcheé vulnerabilidades <strong>CVE de React Server Components</strong> (pasada de hardening de seguridad)
+    - Escribí <code>CLAUDE.md</code> + <code>README.md</code> + <code>.env.template</code> para que cualquiera pueda clonarlo, configurarlo y arrancarlo
+
+    <h3 className="text-xl"><strong>Aspectos técnicos destacados</strong></h3>
+    - <strong>Sin <code>middleware.ts</code> por diseño</strong>: cada ruta protegida hace su propia comprobación de sesión, dejando a la vista el coste/beneficio real
+    - <strong>Ruta de auth catch-all</strong> en <code>/api/auth/[...all]</code> que gestiona todas las llamadas HTTP de better-auth en 4 líneas
+    - <strong>experimental.authInterrupts</strong> activado: <code>unauthorized()</code> lanza un HTTP 401 real desde RSC, renderiza <code>app/unauthorized.tsx</code> in situ, mantiene la URL y sin ningún parpadeo en cliente
+    - <strong>Server Actions</strong> para sign-out, revocación multisesión y actualización de perfil con <code>revalidatePath()</code>
+    - <strong>Turbopack</strong> tanto para <code>dev</code> como para <code>build</code>
+    - <strong>Schema de Prisma</strong> con borrados en cascada, índices en FKs y restricciones unique en email + token
+
+    <h3 className="text-xl"><strong>Retos resueltos</strong></h3>
+    - Dos rutas que <strong>parecen idénticas pero se comportan al revés</strong>: las mantuve sincronizadas visualmente con un componente <code>UnauthorizedScreen</code> compartido
+    - <strong>La trampa del driver HTTP de Neon frente a TCP</strong>: <code>@prisma/client</code> por sí solo vuelve a TCP sin avisar y se rompe en runtimes Edge; lo resolví haciendo obligatorio el adaptador en el singleton
+    - <strong>La pega del sandbox de Resend</strong>: <code>onboarding@resend.dev</code> solo entrega al email registrado; lo documenté como punto didáctico
+    - <strong>Frontera de la verdad de sesión</strong>: impuse que "better-auth es la única fuente de verdad de la sesión", sin desincronizaciones en <code>localStorage</code> ni estado de cliente falsificable
+
+    <h3 className="text-xl"><strong>Expertise demostrada</strong></h3>
+    ✅ Dominio del <strong>App Router de Next.js 15</strong>: RSC, Server Actions, interceptores de rutas, <code>experimental.authInterrupts</code>
+    ✅ Comprensión profunda de los <strong>tradeoffs de auth</strong>: hooks en cliente frente a resolución de sesión en servidor, 200 frente a 401, conservación de la URL, ventanas de fuga de contenido
+    ✅ <strong>Patrones de base de datos para Edge/serverless</strong> con el driver HTTP de Neon + el adaptador de Prisma
+    ✅ <strong>Conciencia de seguridad</strong>: remediación de CVEs, validación de variables de entorno, ningún estado de auth en cliente
+    ✅ <strong>Enseñar a través del código</strong>: contrastes de arquitectura deliberados, documentación integrada y una base reutilizable con licencia MIT`,
   videoUrl: "/demo-better-auth.webm",
   gitHubUrl:
     "https://github.com/franciscojgonzalezfernandez-lgtm/react-nextjs-better-auth-showcase",
