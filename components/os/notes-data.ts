@@ -99,7 +99,7 @@ export const buildNoteFolders = (language: Language): NoteFolder[] => {
       id: "experience",
       title: titles.experience,
       notes: experiences.map((experience) => ({
-        id: `experience-${slugify(`${experience.company}-${experience.period}`)}`,
+        id: experienceNoteId(experience),
         title: experience.company,
         meta: experience.period,
         paragraphs: [
@@ -149,6 +149,13 @@ export const buildNoteFolders = (language: Language): NoteFolder[] => {
     },
   ];
 };
+
+export const experienceNoteId = (experience: { company: string; period: string }) =>
+  `experience-${slugify(`${experience.company}-${experience.period}`)}`;
+
+export const FIRST_EXPERIENCE_NOTE_ID = experiences[0]
+  ? experienceNoteId(experiences[0])
+  : DEFAULT_NOTE_ID;
 
 export const findFolderByNoteId = (folders: NoteFolder[], noteId: string) =>
   folders.find((folder) => folder.notes.some((note) => note.id === noteId)) ?? folders[0];

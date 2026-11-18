@@ -1010,3 +1010,127 @@
   font-weight: 700;
   letter-spacing: 0.04em;
 }
+
+/* f-026: review fixes. */
+
+/* Desktop windows stay between the menu bar and the Dock on short screens. */
+@media (min-width: 701px) {
+  .window-shell:not(.window-maximized) {
+    max-height: calc(100vh - 150px);
+    top: calc(50% - 26px);
+  }
+}
+
+/* Visible close on iOS for Javi's own apps (Asier's apps bring their own nav). */
+.mobile-window-close {
+  display: none;
+}
+@media (max-width: 700px) {
+  .window-shell:is(
+      :has(.project-doc),
+      :has(.preview-doc),
+      :has(.movie-player),
+      :has(.terminal-app),
+      :has(.activity-monitor),
+      :has(.freeform-board),
+      :has(.settings-app),
+      :has(.about-mac)
+    )
+    .mobile-window-close {
+    position: absolute;
+    z-index: 20;
+    top: max(52px, calc(env(safe-area-inset-top) + 6px));
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(28, 28, 30, 0.62);
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    cursor: pointer;
+  }
+  .mobile-window-close:focus-visible {
+    outline: 2px solid #0a84ff;
+    outline-offset: 2px;
+  }
+}
+
+/* f-027: pointer next to Intro.mov so first-time visitors find the intro video. */
+.desktop-icon .desktop-icon-callout {
+  position: absolute;
+  top: 16px;
+  right: calc(100% + 14px);
+  display: grid;
+  gap: 1px;
+  padding: 8px 12px 9px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #1d1d1f;
+  font-style: normal;
+  text-align: left;
+  white-space: nowrap;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.28),
+    0 1px 3px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+  animation: desktop-callout-nudge 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+.desktop-icon .desktop-icon-callout::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -7px;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid rgba(255, 255, 255, 0.94);
+  transform: translateY(-50%);
+}
+.desktop-icon .desktop-icon-callout b {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 19px;
+}
+.desktop-icon .desktop-icon-callout small {
+  font-size: 12px;
+  line-height: 15px;
+  color: #6e6e73;
+}
+.desktop-icon.dragging .desktop-icon-callout {
+  display: none;
+}
+@keyframes desktop-callout-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .desktop-icon .desktop-icon-callout {
+    animation: none;
+  }
+}
+
+.mobile-folder {
+  position: relative;
+}
+.mobile-folder-badge {
+  position: absolute;
+  top: -5px;
+  left: calc(50% + 21px);
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: #ff3b30;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}

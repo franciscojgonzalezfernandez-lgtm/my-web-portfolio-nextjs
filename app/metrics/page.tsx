@@ -1,4 +1,4 @@
-import { Metrics } from "@/components/metrics";
+import Desktop from "@/components/os/desktop";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -37,6 +37,7 @@ export const metadata: Metadata = {
   ],
 };
 
+// Metrics are shown in Activity Monitor.
 export default function MetricsPage() {
-  return <Metrics />;
+  return <Desktop open={{ kind: "app", app: "activity-monitor" }} />;
 }

@@ -315,11 +315,54 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-024 — Cutover: el escritorio pasa a `/`
 
-- Estado: backlog · Prioridad: P1
+- Estado: review · Prioridad: P1
 - Depende de: f-014..f-023
 - AC:
-  - [ ] `/` sirve el escritorio; `/about`, `/experience`, `/metrics`, `/contact`, `/portfolio`, `/portfolio/[slug]` sirven el escritorio con la ventana correspondiente abierta y mantienen su metadata
-  - [ ] Sitemap incluye las mismas URLs; `out/` inspeccionado
-  - [ ] Componentes del sitio antiguo sin uso eliminados; `app/(site)` desaparece
-  - [ ] GA sigue enchufado
-  - [ ] Gates de f-013 + review `impeccable` en EN y DE, desktop y mobile
+  - [x] `/` sirve el escritorio; `/about`, `/experience`, `/metrics`, `/contact`, `/portfolio`, `/portfolio/[slug]` sirven el escritorio con la ventana correspondiente abierta y mantienen su metadata
+  - [x] Sitemap incluye las mismas URLs; `out/` inspeccionado
+  - [x] Componentes del sitio antiguo sin uso eliminados; `app/(site)` desaparece
+  - [x] GA sigue enchufado
+  - [ ] Gates de f-013 + review `impeccable` en EN y DE, desktop y mobile (gates sí: tsc, lint, build y navegador; la review `impeccable` queda pendiente para el owner antes de mergear)
+- Notas: el root layout es el del OS (metadata SEO del sitio antiguo, sin `noindex`). Cada ruta antigua renderiza `<Desktop open={…} />` con su metadata: `/about` → nota Professional, `/experience` → primera nota de Experience, `/metrics` → Activity Monitor, `/contact` → Mail, `/portfolio` → carpeta Projects, `/portfolio/<slug>` → ventana del proyecto. También `?open=<kind>:<value>` en cualquier URL. `not-found` muestra el escritorio. Se corrige el canonical de `/experience`, que apuntaba a `/metrics`. Borrados los componentes, datos e i18n del sitio antiguo sin uso (`lib/intl.ts`, `i18n/`, header/footer/hero/…). `out/` revisado: 9 proyectos, `sitemap.xml` con 15 URLs, canonicals y GA presentes.
+
+## f-025 — Actualizar CLAUDE.md y WORKFLOW.md a la arquitectura OS
+
+- Estado: backlog · Prioridad: P2
+- Depende de: f-024
+- AC:
+  - [ ] `CLAUDE.md` describe `components/os/` (desktop.tsx monolito portado + módulos por app), el registro `apps`, las window kinds y los deep links (`open` prop / `?open=`)
+  - [ ] Sección i18n: desaparece el sistema 2 (`lib/intl.ts`, `i18n/`), queda solo `useLanguageStore`, con la guarda de hidratación (`useSyncExternalStore`) para leerlo en render
+  - [ ] Documentado el override de ESLint para `desktop.tsx`/`youtube.tsx` portados y por qué
+  - [ ] Notas de estilo: `os.css` (de Asier) + `project-window.css` (propio); los tokens shadcn/`globals.css` ya no existen; el wallpaper va por `--wallpaper`
+  - [ ] Revisar si `components/ui/` (shadcn) y sus dependencias siguen haciendo falta; si no, ticket aparte para quitarlas
+- Notas: convenciones = ticket propio (regla de CLAUDE.md), por eso no va dentro de f-024.
+
+## f-026 — Fixes de la review impeccable del escritorio
+
+- Estado: review · Prioridad: P1
+- Depende de: f-024
+- AC:
+  - [x] iOS: los widgets 2×2 no tapan los iconos (filas con alto mínimo = medio ancho de página); las apps se reparten en 2 páginas con las relevantes para recruiters primero; puntos de página de 24px
+  - [x] Alemán completo en el chrome del OS: menu bar (Ablage, Bearbeiten…), Dock y home (Notizen, Fotos, Aktivitätsanzeige, Systemeinstellungen, Wetter, Papierkorb), títulos de ventana y carpetas (Projekte, Meine Zertifikate, Nicht öffnen), Neue E-Mail, Papierkorb vacío, contadores de objetos, tipo de proyecto y fecha `de-CH`; `<html lang>` sigue al idioma
+  - [x] Los iconos del escritorio y de Finder se abren con un clic (Enter también)
+  - [x] La URL sigue a la ventana en primer plano (`/portfolio/<slug>`, `/portfolio`, `/about`, `/experience`, `/contact`, `/metrics`, si no `/`), con `replaceState`
+  - [x] Botón de cerrar visible en iOS para las apps propias (proyecto, Preview, QuickTime, Terminal, Activity Monitor, Freeform, Settings, About)
+  - [x] En escritorio las ventanas no bajan por debajo del Dock (máx. `100vh - 150px`)
+  - [x] Widget del tiempo rota entre Madrid, Flumserberg y Zurich (decisión del owner: "todas")
+  - [x] `tsc`, `lint`, `build` y navegador (375×812 y 1280×800, DE)
+- Notas: el owner decidió mantener todo el contenido de Asier (memes, Facebook…). El hallazgo de "duplicados en el árbol de accesibilidad" era un falso positivo: la capa oculta usa `display: none`. Strings en `components/os/os-i18n.ts`. La review queda en `.impeccable/critique/` (sin commitear).
+
+## f-027 — Contenido del owner: Java, B1, References, CV nuevo, Intro destacado
+
+- Estado: review · Prioridad: P1
+- Depende de: f-026
+- AC:
+  - [x] About This Mac: "Chip" incluye Java (`TypeScript · Java · React · Next.js`)
+  - [x] "Dont play this video.mov" vuelve a reproducirse: el `VideoWindow` reclama el audio al montarse (Strict Mode soltaba el claim y el player se quedaba en negro, pausado)
+  - [x] Nuevo certificado telc Deutsch B1 en "Meine Zertifikate"
+  - [x] Nueva carpeta "References" / "Referenzen" (escritorio, home iOS, deep link `?open=folder:references`, `open references` en Terminal) con la carta de recomendación y la Arbeitsbestätigung; salen de Certifications
+  - [x] Intro.mov destacado: arriba a la derecha con un globo "About me · Watch this first" (respeta `prefers-reduced-motion`; el hueco a su izquierda queda libre); en iOS se llama "About me" con punto rojo y va primero
+  - [x] "Don't Open" contiene también el intro como "The video you should see.mov"
+  - [x] `public/CV-Javi.pdf` sustituido por el CV nuevo (Lead Software Engineer AI)
+  - [x] `tsc`, `lint`, `build` y navegador (1280×800 y 375×812, DE)
+- Notas: fecha y emisor de la Arbeitsbestätigung pendientes del owner (`data/certifications.data.ts`). Clave de posiciones del escritorio subida a `v3` para que todos vean el nuevo orden.

@@ -1,4 +1,4 @@
-import { Contact } from "@/components/contact";
+import Desktop from "@/components/os/desktop";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -25,12 +25,7 @@ export const metadata: Metadata = {
   },
 };
 
+// Contact is the Mail app on the desktop.
 export default function ContactPage() {
-  return (
-    <div className="min-h-screen">
-      <main className="pt-20">
-        <Contact />
-      </main>
-    </div>
-  );
+  return <Desktop open={{ kind: "app", app: "mail" }} />;
 }

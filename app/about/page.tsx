@@ -1,7 +1,5 @@
-import { About } from "@/components/about";
+import Desktop from "@/components/os/desktop";
 import { Metadata } from "next";
-import { professional } from "@/data/aboutMe.professional.data";
-import { personal } from "@/data/aboutMe.personal.data";
 
 export const metadata: Metadata = {
   title: "About - Javier González | Full-Stack Engineer",
@@ -39,8 +37,7 @@ export const metadata: Metadata = {
   ],
 };
 
-const AboutPage = () => {
-  return <About professional={professional} personal={personal} />;
-};
-
-export default AboutPage;
+// The About section lives in Notes on the desktop.
+export default function AboutPage() {
+  return <Desktop open={{ kind: "notes", noteId: "professional" }} />;
+}
