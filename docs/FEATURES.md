@@ -336,3 +336,18 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
   - [ ] Notas de estilo: `os.css` (de Asier) + `project-window.css` (propio); los tokens shadcn/`globals.css` ya no existen; el wallpaper va por `--wallpaper`
   - [ ] Revisar si `components/ui/` (shadcn) y sus dependencias siguen haciendo falta; si no, ticket aparte para quitarlas
 - Notas: convenciones = ticket propio (regla de CLAUDE.md), por eso no va dentro de f-024.
+
+## f-026 — Fixes de la review impeccable del escritorio
+
+- Estado: review · Prioridad: P1
+- Depende de: f-024
+- AC:
+  - [x] iOS: los widgets 2×2 no tapan los iconos (filas con alto mínimo = medio ancho de página); las apps se reparten en 2 páginas con las relevantes para recruiters primero; puntos de página de 24px
+  - [x] Alemán completo en el chrome del OS: menu bar (Ablage, Bearbeiten…), Dock y home (Notizen, Fotos, Aktivitätsanzeige, Systemeinstellungen, Wetter, Papierkorb), títulos de ventana y carpetas (Projekte, Meine Zertifikate, Nicht öffnen), Neue E-Mail, Papierkorb vacío, contadores de objetos, tipo de proyecto y fecha `de-CH`; `<html lang>` sigue al idioma
+  - [x] Los iconos del escritorio y de Finder se abren con un clic (Enter también)
+  - [x] La URL sigue a la ventana en primer plano (`/portfolio/<slug>`, `/portfolio`, `/about`, `/experience`, `/contact`, `/metrics`, si no `/`), con `replaceState`
+  - [x] Botón de cerrar visible en iOS para las apps propias (proyecto, Preview, QuickTime, Terminal, Activity Monitor, Freeform, Settings, About)
+  - [x] En escritorio las ventanas no bajan por debajo del Dock (máx. `100vh - 150px`)
+  - [x] Widget del tiempo rota entre Madrid, Flumserberg y Zurich (decisión del owner: "todas")
+  - [x] `tsc`, `lint`, `build` y navegador (375×812 y 1280×800, DE)
+- Notas: el owner decidió mantener todo el contenido de Asier (memes, Facebook…). El hallazgo de "duplicados en el árbol de accesibilidad" era un falso positivo: la capa oculta usa `display: none`. Strings en `components/os/os-i18n.ts`. La review queda en `.impeccable/critique/` (sin commitear).

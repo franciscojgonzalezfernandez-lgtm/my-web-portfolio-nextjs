@@ -96,6 +96,7 @@ import {
   type NoteFolder,
 } from "./notes-data";
 import { useLanguageStore } from "@/stores/useLanguageStore";
+import { appName, osChrome, useOsChrome, useOsLanguage, projectTypeLabel } from "./os-i18n";
 
 type Project = {
   id: string;
@@ -153,6 +154,19 @@ const apps = [
 type DockApp = (typeof apps)[number];
 type AppId = DockApp["id"];
 const MOBILE_DOCK_APP_IDS = ["notes", "photos", "mail", "spotify"] as const;
+const MOBILE_FIRST_PAGE_APPS = 8;
+const MOBILE_HOME_APP_ORDER: readonly AppId[] = [
+  "youtube",
+  "linkedin",
+  "github",
+  "terminal",
+  "activity-monitor",
+  "settings",
+  "freeform",
+  "chatgpt",
+  "instagram",
+  "facebook",
+];
 type MobileDockAppId = (typeof MOBILE_DOCK_APP_IDS)[number];
 
 const isMobileDockApp = (
@@ -1001,6 +1015,7 @@ function WindowShell({
     dragRef.current = null;
   };
 
+  const windowLanguage = useOsLanguage();
   const className = [
     "window-shell",
     variant === "dark" && "dark-window",
@@ -1026,6 +1041,14 @@ function WindowShell({
       }
       onPointerDown={onFocus}
     >
+      <button
+        type="button"
+        className="mobile-window-close"
+        aria-label={osChrome(windowLanguage).close}
+        onClick={onClose}
+      >
+        <span aria-hidden="true">×</span>
+      </button>
       <div
         className="titlebar"
         onPointerDown={onPointerDown}
@@ -1274,7 +1297,7 @@ const NotesWindow = ({
   onClose: () => void;
   onOpenProject: (slug: string) => void;
 } & WindowStackProps) => (
-  <WindowShell title="Notes" onClose={onClose} {...stackProps}>
+  <WindowShell title={appName("notes", "Notes", useOsLanguage())} onClose={onClose} {...stackProps}>
     <NotesApp
       key={`${noteId}-${view}`}
       noteId={noteId}
@@ -1324,6 +1347,7 @@ const AppLauncher = ({
   onOpen: (app: DockApp) => void;
   children?: ReactNode;
 }) => {
+  const name = appName(app.id, app.name, useOsLanguage());
   if ("href" in app) {
     return (
       <a
@@ -1332,7 +1356,7 @@ const AppLauncher = ({
         target="_blank"
         rel="noopener noreferrer"
         data-launcher={app.id}
-        aria-label={`${app.name}, opens in a new tab`}
+        aria-label={`${name}, opens in a new tab`}
         onClick={() => onOpen(app)}
       >
         <AppIcon app={app} />
@@ -1346,7 +1370,7 @@ const AppLauncher = ({
       className={className}
       type="button"
       data-launcher={app.id}
-      aria-label={app.name}
+      aria-label={name}
       onClick={() => onOpen(app)}
     >
       <AppIcon app={app} />
@@ -1469,10 +1493,11 @@ function DesktopDock({
 }) {
   // Motion values update the animation without re-rendering the desktop.
   const pointerX = useMotionValue(Infinity);
+  const language = useOsLanguage();
   const renderApp = (app: DockApp) => (
     <DockSlot
       key={app.id}
-      label={app.name}
+      label={appName(app.id, app.name, language)}
       pointerX={pointerX}
       className={app.id === "linkedin" ? "separated" : undefined}
     >
@@ -1619,9 +1644,11 @@ function AppWindow({
   onClose,
   ...stackProps
 }: { app: WindowAppId; onClose: () => void } & WindowStackProps) {
+  const language = useOsLanguage();
+  const chrome = osChrome(language);
   if (app === "activity-monitor") {
     return (
-      <WindowShell title="Activity Monitor" onClose={onClose} {...stackProps}>
+      <WindowShell title={appName("activity-monitor", "Activity Monitor", language)} onClose={onClose} {...stackProps}>
         <ActivityMonitor />
       </WindowShell>
     );
@@ -1665,14 +1692,14 @@ function AppWindow({
   }
   if (app === "photos") {
     return (
-      <WindowShell title="Photos" onClose={onClose} {...stackProps}>
+      <WindowShell title={appName("photos", "Photos", language)} onClose={onClose} {...stackProps}>
         <PhotosApp />
       </WindowShell>
     );
   }
   if (app === "mail") {
     return (
-      <WindowShell title="New Message" onClose={onClose} {...stackProps}>
+      <WindowShell title={chrome.newMessage} onClose={onClose} {...stackProps}>
         <MailComposeForm />
       </WindowShell>
     );
@@ -1685,21 +1712,22 @@ function AppWindow({
     );
   }
   return (
-    <WindowShell title="Trash" onClose={onClose} {...stackProps}>
+    <WindowShell title={chrome.trash} onClose={onClose} {...stackProps}>
       <div className="empty-trash">
         <img src="/os/doc-icons/trash.png" alt="" />
-        <h2>Trash is Empty</h2>
-        <p>Nothing to see here.</p>
+        <h2>{chrome.trashEmpty}</h2>
+        <p>{chrome.trashHint}</p>
       </div>
     </WindowShell>
   );
 }
 
 const PDF_ICON = "/os/doc-icons/pdf.svg";
-const FOLDER_TITLES: Record<FolderId, string> = {
-  secret: "Don't Open",
-  projects: "Projects",
-  certifications: "My certifications",
+const folderTitle = (folder: FolderId, language: "english" | "german") => {
+  const chrome = osChrome(language);
+  if (folder === "projects") return chrome.projects;
+  if (folder === "certifications") return chrome.certifications;
+  return chrome.secret;
 };
 
 type FolderItem = {
@@ -1727,13 +1755,14 @@ function FolderWindow({
   onOpenPreview: (doc: PreviewDoc) => void;
 } & WindowStackProps) {
   const isGerman = useLanguageStore((state) => state.language) === "german";
-  const title = FOLDER_TITLES[folder];
+  const folderLanguage = useOsLanguage();
+  const title = folderTitle(folder, folderLanguage);
   const items: FolderItem[] =
     folder === "projects"
       ? portfolioProjects.map((project) => ({
           id: project.slug,
           label: project.title,
-          meta: project.projectType,
+          meta: projectTypeLabel(project.projectType, folderLanguage),
           thumbnail: project.images[0],
           onOpen: () => onOpenProject(project.slug),
         }))
@@ -1843,13 +1872,9 @@ function FolderWindow({
                   type="button"
                   className="finder-thumb-file"
                   aria-label={`Open ${item.label}`}
-                  onDoubleClick={item.onOpen}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") item.onOpen();
-                  }}
                   onClick={(event) => {
-                    // Touch and pen have no double click; a tap opens directly.
-                    if ((event.nativeEvent as PointerEvent).pointerType !== "mouse") item.onOpen();
+                    // Single click opens, as on the desktop icons.
+                    if (event.detail <= 1) item.onOpen();
                   }}
                 >
                   <span className={`finder-thumb ${item.isFileIcon ? "finder-thumb-icon" : ""}`}>
@@ -1882,7 +1907,7 @@ function FolderWindow({
             Macintosh HD <b>›</b> Users <b>›</b> javi <b>›</b> Desktop <b>›</b>{" "}
             <strong>{title}</strong>
           </div>
-          <span>{hasItems ? `${items.length} items` : "1 item"}</span>
+          <span>{osChrome(folderLanguage).items(hasItems ? items.length : 1)}</span>
         </div>
       </div>
       <FilesApp
@@ -1959,7 +1984,9 @@ type FilesAppProps = {
   items?: FolderItem[];
 };
 
-const FilesApp = ({ title, onBack, onOpenVideo, items }: FilesAppProps) => (
+const FilesApp = ({ title, onBack, onOpenVideo, items }: FilesAppProps) => {
+  const filesLanguage = useOsLanguage();
+  return (
   <div className="files-app">
     <header className="files-header">
       <div className="files-nav">
@@ -2028,7 +2055,7 @@ const FilesApp = ({ title, onBack, onOpenVideo, items }: FilesAppProps) => (
           </button>
         )}
       </div>
-      <p className="files-count">{items ? `${items.length} items` : "1 item"}</p>
+      <p className="files-count">{osChrome(filesLanguage).items(items ? items.length : 1)}</p>
     </div>
     <nav className="files-tabs" aria-hidden="true">
       {FILES_TABS.map((tab) => (
@@ -2039,7 +2066,8 @@ const FilesApp = ({ title, onBack, onOpenVideo, items }: FilesAppProps) => (
       ))}
     </nav>
   </div>
-);
+  );
+};
 
 const VIDEO_ID = "dQw4w9WgXcQ";
 const VIDEO_TITLE = "Never Gonna Give You Up";
@@ -5446,7 +5474,7 @@ const DesktopWidget = ({
   position,
   onMove,
   onOpen,
-  label = "Madrid weather widget. Press Enter to open Weather. Drag or use arrow keys to move.",
+  label = "Weather widget (Madrid, Flumserberg, Zurich). Press Enter to open Weather. Drag or use arrow keys to move.",
   className,
   children,
 }: {
@@ -5676,7 +5704,9 @@ const DesktopIcon = ({
       return;
     }
     // Keyboard activation opens immediately; pointer clicks open on the second click.
-    if (event.detail === 0 || event.detail === 2) onOpen();
+    // One click (or Enter) opens: most visitors are not Mac users. A double click
+    // still lands here once, because the second click reports detail 2.
+    if (event.detail <= 1) onOpen();
   };
 
   const className = [
@@ -6482,7 +6512,23 @@ const DARK_SURFACE_IDS = new Set<string>([
   "terminal",
 ]);
 
-const describeMinimizedWindow = (item: OpenWindow): MinimizedWindowTile => {
+// Old site routes that render this desktop with a window open (app/**/page.tsx).
+const routeForWindow = (content: WindowState): string => {
+  if (content.kind === "project") return `/portfolio/${content.slug}`;
+  if (content.kind === "folder" && content.folder === "projects") return "/portfolio";
+  if (content.kind === "notes") {
+    if (content.noteId.startsWith("experience-")) return "/experience";
+    if (content.noteId === "professional" || content.noteId === "personal") return "/about";
+  }
+  if (content.kind === "app" && content.app === "mail") return "/contact";
+  if (content.kind === "app" && content.app === "activity-monitor") return "/metrics";
+  return "/";
+};
+
+const describeMinimizedWindow = (
+  item: OpenWindow,
+  language: "english" | "german",
+): MinimizedWindowTile => {
   const { id, content } = item;
   if (content.kind === "project") {
     const project = portfolioProjects.find((entry) => entry.slug === content.slug);
@@ -6517,7 +6563,7 @@ const describeMinimizedWindow = (item: OpenWindow): MinimizedWindowTile => {
   if (content.kind === "folder") {
     return {
       id,
-      label: FOLDER_TITLES[content.folder],
+      label: folderTitle(content.folder, language),
       icon: "/os/doc-icons/folder.png",
       variant: "paper",
     };
@@ -6701,6 +6747,12 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
   usePreventBrowserZoom();
   useTypingViewport();
   const [openWindows, setOpenWindows] = useState<OpenWindow[]>([]);
+  const handledDeepLink = useRef(false);
+  const osLanguage = useOsLanguage();
+  const chrome = useOsChrome();
+  useEffect(() => {
+    document.documentElement.lang = osLanguage === "german" ? "de" : "en";
+  }, [osLanguage]);
   const [wallpaper, setWallpaper] = useState<WallpaperId>("default");
   useEffect(() => {
     try {
@@ -6769,6 +6821,16 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
   const lastPointerRef = useRef<ScreenPoint | null>(null);
   const skipLaunchRef = useRef(false);
   const foregroundWindow = findForegroundWindow(openWindows);
+  // Keep the address bar on the route of the window in front, so the URL can be
+  // shared. Replace, not push: windows are not pages, Back leaves the site.
+  const foregroundPath = foregroundWindow ? routeForWindow(foregroundWindow.content) : "/";
+  useEffect(() => {
+    if (!handledDeepLink.current) return;
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+    const next = `${basePath}${foregroundPath}`;
+    if (window.location.pathname.replace(/\/$/, "") === next.replace(/\/$/, "")) return;
+    window.history.replaceState(window.history.state, "", next || "/");
+  }, [foregroundPath]);
   const foregroundId = foregroundWindow?.id ?? null;
   const foregroundLauncher = foregroundWindow ? windowAppId(foregroundWindow) : null;
   const isSwitcherOpen = switcher !== null;
@@ -6922,7 +6984,6 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
   };
   // Deep links: /desktop?open=project:<slug> or ?open=folder:projects. f-024
   // maps the old routes (/portfolio/<slug>, …) onto the same targets.
-  const handledDeepLink = useRef(false);
   useEffect(() => {
     if (handledDeepLink.current) return;
     handledDeepLink.current = true;
@@ -7035,10 +7096,10 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
   const minimizedWindows = openWindows
     .filter((item) => item.minimizedAt !== null)
     .sort(byMinimizeOrder)
-    .map(describeMinimizedWindow);
+    .map((item) => describeMinimizedWindow(item, osLanguage));
   const switcherCards = [...openWindows]
     .sort(byMostRecent)
-    .map(describeMinimizedWindow);
+    .map((item) => describeMinimizedWindow(item, osLanguage));
   const desktopClassName = ["desktop", isSwitcherOpen && "mobile-switcher-open"]
     .filter(Boolean)
     .join(" ");
@@ -7115,6 +7176,18 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
     onToggle: handleToggleControl,
   };
 
+  // iOS home: two rows of apps fit under the widgets and files, recruiter-relevant
+  // apps first; the rest moves to page 2.
+  const mobileHomeApps = MOBILE_HOME_APP_ORDER.flatMap((id) => {
+    const app = apps.find((entry) => entry.id === id);
+    return app && !isMobileDockApp(app) ? [app] : [];
+  });
+  const renderMobileApp = (app: DockApp) => (
+    <AppLauncher key={app.id} app={app} onOpen={openApp}>
+      <span>{appName(app.id, app.name, osLanguage)}</span>
+    </AppLauncher>
+  );
+
   return (
     <StartupScreen ready={iconPositionsReady && weatherStatus !== "loading"}>
     <main
@@ -7149,11 +7222,11 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
           </svg>
           </button>
           <b>Javi</b>
-          <span>File</span>
-          <span>Edit</span>
-          <span>View</span>
-          <span>Window</span>
-          <span>Help</span>
+          <span>{chrome.file}</span>
+          <span>{chrome.edit}</span>
+          <span>{chrome.view}</span>
+          <span>{chrome.window}</span>
+          <span>{chrome.help}</span>
         </div>
         <div>
           <LanguageMenu />
@@ -7228,7 +7301,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
       >
         <DesktopIcon
           id="projects-folder"
-          label="Projects"
+          label={chrome.projects}
           selected={selected === "projects-folder"}
           position={positionFor(iconPositions, "projects-folder")}
           onSelect={handleSelectIcon}
@@ -7237,7 +7310,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
         />
         <DesktopIcon
           id="certifications-folder"
-          label="My certifications"
+          label={chrome.certifications}
           selected={selected === "certifications-folder"}
           position={positionFor(iconPositions, "certifications-folder")}
           onSelect={handleSelectIcon}
@@ -7268,7 +7341,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
         />
         <DesktopIcon
           id="folder"
-          label="Don't Open"
+          label={chrome.secret}
           selected={selected === "folder"}
           position={positionFor(iconPositions, "folder")}
           onSelect={handleSelectIcon}
@@ -7325,12 +7398,12 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
             <SpotifyWidget player={spotify} variant="mobile" onOpen={openSpotify} />
             <MobilePhotoWidget onOpen={handleOpenMemeImage} />
             <MobileFolderLauncher
-              label="Projects"
+              label={chrome.projects}
               icon="/os/doc-icons/folder.png"
               onOpen={handleOpenProjectsFolder}
             />
             <MobileFolderLauncher
-              label="Certifications"
+              label={chrome.certificationsShort}
               launcherKey="certifications-folder"
               icon="/os/doc-icons/folder.png"
               onOpen={handleOpenCertificationsFolder}
@@ -7347,26 +7420,17 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
               icon={PDF_ICON}
               onOpen={handleOpenCv}
             />
-            {apps
-              .filter(
-                (app) =>
-                  app.id !== "trash" &&
-                  app.id !== "weather" &&
-                  !isMobileDockApp(app),
-              )
-              .map((app) => (
-                <AppLauncher key={app.id} app={app} onOpen={openApp}>
-                  <span>{app.name}</span>
-                </AppLauncher>
-              ))}
+            {mobileHomeApps.slice(0, MOBILE_FIRST_PAGE_APPS).map(renderMobileApp)}
           </Fragment>,
-          <MobileFolderLauncher
-            key="dont-open"
-            label="Don't Open"
-            launcherKey="folder"
-            icon="/os/doc-icons/folder.png"
-            onOpen={handleOpenSecretFolder}
-          />,
+          <Fragment key="more">
+            {mobileHomeApps.slice(MOBILE_FIRST_PAGE_APPS).map(renderMobileApp)}
+            <MobileFolderLauncher
+              label={chrome.secret}
+              launcherKey="folder"
+              icon="/os/doc-icons/folder.png"
+              onOpen={handleOpenSecretFolder}
+            />
+          </Fragment>,
         ]}
       />
 
@@ -7427,7 +7491,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
           );
         if (window.content.kind === "settings")
           return (
-            <WindowShell key={window.id} title="System Settings" onClose={onClose} {...stackProps}>
+            <WindowShell key={window.id} title={chrome.systemSettings} onClose={onClose} {...stackProps}>
               <SettingsApp wallpaper={wallpaper} onWallpaperChange={handleWallpaperChange} />
             </WindowShell>
           );
@@ -7480,7 +7544,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
           const project = portfolioProjects.find((entry) => entry.slug === slug);
           if (!project) return null;
           return (
-            <WindowShell key={window.id} title={project.title} onClose={onClose} {...stackProps}>
+            <WindowShell key={window.id} title={osLanguage === "german" ? project.titleGerman : project.title} onClose={onClose} {...stackProps}>
               <ProjectDocument project={project} />
             </WindowShell>
           );

@@ -4,7 +4,7 @@ import parse from "html-react-parser";
 import { CustomImage } from "@/components/high-order-components/CustomImage";
 import { CustomVideo } from "@/components/high-order-components/CustomVideo";
 import type { Project } from "@/interfaces/project.interface";
-import { useLanguageStore } from "@/stores/useLanguageStore";
+import { formatProjectDate, projectTypeLabel, useOsLanguage } from "./os-i18n";
 
 const LABELS = {
   english: { type: "Type", released: "Released", stack: "Stack", visit: "Visit site", code: "Source code", gallery: "Gallery" },
@@ -14,7 +14,7 @@ const LABELS = {
 // Project document shown inside a Finder-opened window (desktop) or a full-screen
 // app card (iOS). Content comes straight from data/projects/*.project.data.ts.
 export default function ProjectDocument({ project }: { project: Project }) {
-  const language = useLanguageStore((state) => state.language);
+  const language = useOsLanguage();
   const isGerman = language === "german";
   const labels = LABELS[language];
   const [cover, ...gallery] = project.images;
@@ -40,9 +40,9 @@ export default function ProjectDocument({ project }: { project: Project }) {
 
       <header className="project-doc-header">
         <p className="project-doc-kicker">
-          <span>{labels.type}: {project.projectType}</span>
+          <span>{labels.type}: {projectTypeLabel(project.projectType, language)}</span>
           <span aria-hidden="true">·</span>
-          <span>{labels.released}: {project.releaseDate}</span>
+          <span>{labels.released}: {formatProjectDate(project.releaseDate, language)}</span>
         </p>
         <h2>{isGerman ? project.titleGerman : project.title}</h2>
         <p className="project-doc-lede">

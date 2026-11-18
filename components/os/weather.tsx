@@ -2,12 +2,23 @@
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
-const ZURICH_NAME = "Madrid";
+// The widget cycles through these places: Spain, where Javi is from; Flumserberg,
+// where he teaches snowboarding; Zurich, where he lives.
+const PLACES = [
+  { name: "Madrid", latitude: 40.4168, longitude: -3.7038 },
+  { name: "Flumserberg", latitude: 47.0906, longitude: 9.2869 },
+  { name: "Zurich", latitude: 47.3769, longitude: 8.5417 },
+] as const;
+const DEFAULT_PLACE_NAME = PLACES[0].name;
+const ROTATE_MS = 8000;
 const HOUR_COUNT = 6;
 const MOBILE_HOUR_COUNT = 4;
 const REFRESH_MS = 10 * 60 * 1000;
 const FORECAST_URL =
-  "https://api.open-meteo.com/v1/forecast?latitude=40.4168&longitude=-3.7038&current=temperature_2m,weather_code,is_day&hourly=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FMadrid&forecast_days=2";
+  "https://api.open-meteo.com/v1/forecast?" +
+  `latitude=${PLACES.map((place) => place.latitude).join(",")}` +
+  `&longitude=${PLACES.map((place) => place.longitude).join(",")}` +
+  "&current=temperature_2m,weather_code,is_day&hourly=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=2";
 
 export type Sky =
   | "clear"
@@ -41,6 +52,7 @@ type HourSlot = {
 };
 
 type ZurichWeather = {
+  place: string;
   temperature: number;
   code: number;
   isDay: boolean;
@@ -169,7 +181,7 @@ const readCondition = (weather: ZurichWeather | null, status: WeatherStatus) => 
   return "Weather Unavailable";
 };
 
-const parseZurichWeather = (payload: unknown): ZurichWeather | null => {
+const parseZurichWeather = (payload: unknown, place: string): ZurichWeather | null => {
   if (!isRecord(payload)) return null;
   const current = payload.current;
   const hourly = payload.hourly;
@@ -223,6 +235,7 @@ const parseZurichWeather = (payload: unknown): ZurichWeather | null => {
   }
 
   return {
+    place,
     temperature: Math.round(temperature),
     code,
     isDay: current.is_day === 1,
@@ -233,7 +246,9 @@ const parseZurichWeather = (payload: unknown): ZurichWeather | null => {
 };
 
 export const useZurichWeather = (isOffline: boolean) => {
-  const [weather, setWeather] = useState<ZurichWeather | null>(null);
+  const [places, setPlaces] = useState<ZurichWeather[]>([]);
+  const [placeIndex, setPlaceIndex] = useState(0);
+  const weather = places.length > 0 ? places[placeIndex % places.length] : null;
   const [status, setStatus] = useState<WeatherStatus>("loading");
   const weatherRef = useRef<ZurichWeather | null>(null);
 
@@ -260,10 +275,16 @@ export const useZurichWeather = (isOffline: boolean) => {
           signal: controller.signal,
         });
         if (!response.ok) throw new Error("forecast failed");
-        const next = parseZurichWeather(await response.json());
-        if (!next) throw new Error("forecast invalid");
+        const payload: unknown = await response.json();
+        // One location answers with an object, several with an array, in PLACES order.
+        const payloads = Array.isArray(payload) ? payload : [payload];
+        const next = payloads.flatMap((entry, index) => {
+          const parsed = parseZurichWeather(entry, PLACES[index]?.name ?? DEFAULT_PLACE_NAME);
+          return parsed ? [parsed] : [];
+        });
+        if (next.length === 0) throw new Error("forecast invalid");
         if (cancelled || request !== generation) return;
-        setWeather(next);
+        setPlaces(next);
         setStatus("ready");
       } catch (error) {
         if (cancelled || request !== generation) return;
@@ -291,6 +312,14 @@ export const useZurichWeather = (isOffline: boolean) => {
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [isOffline]);
+
+  useEffect(() => {
+    if (places.length < 2) return;
+    const timer = window.setInterval(() => {
+      setPlaceIndex((current) => (current + 1) % places.length);
+    }, ROTATE_MS);
+    return () => window.clearInterval(timer);
+  }, [places.length]);
 
   return { weather, status };
 };
@@ -571,6 +600,7 @@ const TemperatureRange = ({ high, low }: { high: string; low: string }) => (
 );
 
 type WidgetBodyProps = {
+  place: string;
   variant: "desktop" | "mobile";
   tempText: string;
   condition: string;
@@ -582,6 +612,7 @@ type WidgetBodyProps = {
 };
 
 const WidgetBody = ({
+  place,
   variant,
   tempText,
   condition,
@@ -594,7 +625,7 @@ const WidgetBody = ({
   <div className="wx-body">
     <div className="wx-top">
       <div className="wx-copy">
-        <p className="wx-place">{ZURICH_NAME}</p>
+        <p className="wx-place">{place}</p>
         <p className="wx-temp">{tempText}</p>
       </div>
       <div className="wx-summary">
@@ -614,8 +645,8 @@ const WeatherWidget = ({ variant, weather, status, onOpen }: WeatherWidgetProps)
   const variantClass = variant === "desktop" ? "wx wx-desktop desktop-only" : "wx wx-mobile";
   const rootClass = [variantClass, onOpen && "cursor-pointer"].filter(Boolean).join(" ");
   const summary = weather
-    ? `${ZURICH_NAME}, ${weather.temperature} degrees, ${condition}. High ${weather.high}, low ${weather.low}.`
-    : `${ZURICH_NAME} weather`;
+    ? `${weather.place}, ${weather.temperature} degrees, ${condition}. High ${weather.high}, low ${weather.low}.`
+    : `${DEFAULT_PLACE_NAME} weather`;
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     if (!onOpen) return;
@@ -638,6 +669,7 @@ const WeatherWidget = ({ variant, weather, status, onOpen }: WeatherWidgetProps)
     <section className={rootClass} aria-busy={status === "loading"} {...openProps}>
       <WeatherScene scene={scene} />
       <WidgetBody
+        place={weather?.place ?? DEFAULT_PLACE_NAME}
         variant={variant}
         tempText={formatTemperature(weather ? weather.temperature : null)}
         condition={condition}
