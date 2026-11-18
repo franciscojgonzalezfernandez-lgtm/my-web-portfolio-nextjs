@@ -83,6 +83,7 @@ import SettingsApp, {
 import PreviewDocument, {
   certificateDocs,
   certificateLabel,
+  referenceDocs,
   CV_LABEL,
   CV_PATH,
   findCertificate,
@@ -154,7 +155,7 @@ const apps = [
 type DockApp = (typeof apps)[number];
 type AppId = DockApp["id"];
 const MOBILE_DOCK_APP_IDS = ["notes", "photos", "mail", "spotify"] as const;
-const MOBILE_FIRST_PAGE_APPS = 8;
+const MOBILE_FIRST_PAGE_APPS = 7;
 const MOBILE_HOME_APP_ORDER: readonly AppId[] = [
   "youtube",
   "linkedin",
@@ -205,13 +206,13 @@ type OpenWindow = {
   minimizedAt: number | null;
 };
 
-type FolderId = "secret" | "projects" | "certifications";
+type FolderId = "secret" | "projects" | "certifications" | "references";
 
 // A window to open on load: from a route (/portfolio/<slug>, /about, …) via the
 // `open` prop, or from ?open=<kind>:<value> on any URL.
 export type DeepLinkTarget =
   | { kind: "project"; slug: string }
-  | { kind: "folder"; folder: "projects" | "certifications" }
+  | { kind: "folder"; folder: "projects" | "certifications" | "references" }
   | { kind: "notes"; noteId: string }
   | { kind: "app"; app: "mail" | "activity-monitor" | "freeform" | "photos" };
 
@@ -224,7 +225,7 @@ export const readDeepLink = (search: string): DeepLinkTarget | null => {
   if (kind === "project" && portfolioProjects.some((project) => project.slug === value)) {
     return { kind: "project", slug: value };
   }
-  if (kind === "folder" && (value === "projects" || value === "certifications")) {
+  if (kind === "folder" && (value === "projects" || value === "certifications" || value === "references")) {
     return { kind: "folder", folder: value };
   }
   if (kind === "notes" && value) return { kind: "notes", noteId: value };
@@ -1727,6 +1728,7 @@ const folderTitle = (folder: FolderId, language: "english" | "german") => {
   const chrome = osChrome(language);
   if (folder === "projects") return chrome.projects;
   if (folder === "certifications") return chrome.certifications;
+  if (folder === "references") return chrome.references;
   return chrome.secret;
 };
 
@@ -1744,6 +1746,7 @@ function FolderWindow({
   folder,
   onClose,
   onOpenVideo,
+  onOpenIntro,
   onOpenProject,
   onOpenPreview,
   ...stackProps
@@ -1751,6 +1754,7 @@ function FolderWindow({
   folder: FolderId;
   onClose: () => void;
   onOpenVideo: () => void;
+  onOpenIntro: () => void;
   onOpenProject: (slug: string) => void;
   onOpenPreview: (doc: PreviewDoc) => void;
 } & WindowStackProps) {
@@ -1766,16 +1770,17 @@ function FolderWindow({
           thumbnail: project.images[0],
           onOpen: () => onOpenProject(project.slug),
         }))
-      : folder === "certifications"
-        ? certificateDocs.map((certificate) => ({
+      : folder === "certifications" || folder === "references"
+        ? (folder === "references" ? referenceDocs : certificateDocs).map((certificate) => ({
             id: certificate.id,
             label: certificateLabel(certificate, isGerman),
-            meta: certificate.date,
+            meta: certificate.date || undefined,
             thumbnail: PDF_ICON,
             isFileIcon: true,
             onOpen: () => onOpenPreview({ kind: "certificate", id: certificate.id }),
           }))
         : [];
+  const introLabel = `${osChrome(folderLanguage).introInSecret}.mov`;
   const hasItems = folder !== "secret";
   const sidebar = [
     {
@@ -1886,6 +1891,10 @@ function FolderWindow({
             </div>
           ) : (
           <div className="finder-files">
+            <button className="movie-file" aria-label={`Open ${introLabel}`} onClick={onOpenIntro}>
+              <MovIcon />
+              <strong>{introLabel}</strong>
+            </button>
             <button
               className="movie-file"
               aria-label="Open Dont play this video.mov"
@@ -1907,13 +1916,15 @@ function FolderWindow({
             Macintosh HD <b>›</b> Users <b>›</b> javi <b>›</b> Desktop <b>›</b>{" "}
             <strong>{title}</strong>
           </div>
-          <span>{osChrome(folderLanguage).items(hasItems ? items.length : 1)}</span>
+          <span>{osChrome(folderLanguage).items(hasItems ? items.length : 2)}</span>
         </div>
       </div>
       <FilesApp
         title={title}
         onBack={onClose}
         onOpenVideo={onOpenVideo}
+        onOpenIntro={onOpenIntro}
+        introLabel={introLabel}
         items={hasItems ? items : undefined}
       />
     </WindowShell>
@@ -1981,10 +1992,12 @@ type FilesAppProps = {
   title: string;
   onBack: () => void;
   onOpenVideo: () => void;
+  onOpenIntro: () => void;
+  introLabel: string;
   items?: FolderItem[];
 };
 
-const FilesApp = ({ title, onBack, onOpenVideo, items }: FilesAppProps) => {
+const FilesApp = ({ title, onBack, onOpenVideo, onOpenIntro, introLabel, items }: FilesAppProps) => {
   const filesLanguage = useOsLanguage();
   return (
   <div className="files-app">
@@ -2042,20 +2055,32 @@ const FilesApp = ({ title, onBack, onOpenVideo, items }: FilesAppProps) => {
             </button>
           ))
         ) : (
-          <button
-            className="files-item"
-            type="button"
-            aria-label="Open Dont play this video.mov"
-            onClick={onOpenVideo}
-          >
-            <MovIcon />
-            <strong>Dont play this video</strong>
-            <small>12 Oct 2025</small>
-            <small>42.1 MB</small>
-          </button>
+          <>
+            <button
+              className="files-item"
+              type="button"
+              aria-label={`Open ${introLabel}`}
+              onClick={onOpenIntro}
+            >
+              <MovIcon />
+              <strong>{introLabel.replace(/\.mov$/, "")}</strong>
+              <small>Intro.mov</small>
+            </button>
+            <button
+              className="files-item"
+              type="button"
+              aria-label="Open Dont play this video.mov"
+              onClick={onOpenVideo}
+            >
+              <MovIcon />
+              <strong>Dont play this video</strong>
+              <small>12 Oct 2025</small>
+              <small>42.1 MB</small>
+            </button>
+          </>
         )}
       </div>
-      <p className="files-count">{osChrome(filesLanguage).items(items ? items.length : 1)}</p>
+      <p className="files-count">{osChrome(filesLanguage).items(items ? items.length : 2)}</p>
     </div>
     <nav className="files-tabs" aria-hidden="true">
       {FILES_TABS.map((tab) => (
@@ -2139,6 +2164,10 @@ function VideoWindow({
   });
 
   useEffect(() => {
+    // Claim on mount too, not only in openVideo: React Strict Mode runs this
+    // cleanup once right after mounting, which released the claim and left the
+    // player paused on a black frame.
+    onClaimRef.current();
     return () => {
       onPlayingChangeRef.current(false);
       onReleaseRef.current();
@@ -4348,7 +4377,7 @@ type IconPosition = {
 
 type DesktopSize = { width: number; height: number };
 
-const DESKTOP_POSITIONS_KEY = "javi-os-desktop-icon-positions-v2";
+const DESKTOP_POSITIONS_KEY = "javi-os-desktop-icon-positions-v3";
 const DRAG_THRESHOLD = 4;
 const DOCK_CLEARANCE = 108;
 const DESKTOP_EDGE_INSET = 28;
@@ -4359,11 +4388,14 @@ const DESKTOP_WIDGET_HEIGHT = 166;
 const DESKTOP_WIDGET_GAP = 16;
 const SPOTIFY_WIDGET_LAYOUT_KEY = "javi-os-spotify-widget-layout";
 const SPOTIFY_WIDGET_LAYOUT = "square-below-weather";
+// Intro.mov goes first: the top-right corner is where the eye lands, and the
+// callout beside it says "About me".
 const FIXED_DESKTOP_ICON_IDS = [
+  "intro-mov",
   "projects-folder",
   "certifications-folder",
+  "references-folder",
   "cv-pdf",
-  "intro-mov",
 ] as const;
 const STRAY_ICON_ID = "folder";
 const STRAY_ICON_ANCHOR = { x: 0.21, y: 0.64 };
@@ -4394,9 +4426,15 @@ const createDefaultDesktopPositions = (
       (height - DOCK_CLEARANCE) * STRAY_ICON_ANCHOR.y,
     ),
   };
-  iconIds.forEach((id, index) => {
-    const column = Math.floor(index / rowsPerColumn);
-    const row = index % rowsPerColumn;
+  // The first icon (Intro.mov) has a callout to its left: keep that slot, the
+  // top of the second column, empty.
+  const calloutSlot = rowsPerColumn;
+  let slot = 0;
+  iconIds.forEach((id) => {
+    if (slot === calloutSlot) slot += 1;
+    const column = Math.floor(slot / rowsPerColumn);
+    const row = slot % rowsPerColumn;
+    slot += 1;
     positions[id] = toPercent(
       firstColumnLeft - column * (DESKTOP_ICON_WIDTH + DESKTOP_ICON_COLUMN_GAP),
       DESKTOP_EDGE_INSET + row * DESKTOP_ICON_ROW_HEIGHT,
@@ -5540,6 +5578,8 @@ type MobileFolderLauncherProps = {
   launcherKey?: string;
   icon?: string;
   previews?: ReactNode;
+  // iOS-style red dot that draws the eye to a launcher worth opening first.
+  badge?: boolean;
   onOpen: () => void;
 };
 
@@ -5548,6 +5588,7 @@ const MobileFolderLauncher = ({
   launcherKey,
   icon,
   previews,
+  badge,
   onOpen,
 }: MobileFolderLauncherProps) => {
   const glyph = icon ? (
@@ -5567,6 +5608,7 @@ const MobileFolderLauncher = ({
       onClick={onOpen}
     >
       {glyph}
+      {badge ? <i className="mobile-folder-badge" aria-hidden="true" /> : null}
       <span>{label}</span>
     </button>
   );
@@ -5674,11 +5716,14 @@ const DesktopIcon = ({
   onSelect,
   onOpen,
   onMove,
+  callout,
 }: {
   id: string;
   label: string;
   icon?: string;
   variant?: "folder" | "picture" | "document";
+  // A pointer beside the icon that tells first-time visitors to open it.
+  callout?: { title: string; hint: string };
   selected: boolean;
   position: IconPosition;
   onSelect: (id: string) => void;
@@ -5722,7 +5767,7 @@ const DesktopIcon = ({
     <button
       ref={elementRef}
       className={className}
-      aria-label={label}
+      aria-label={callout ? `${label}, ${callout.title}` : label}
       style={
         {
           "--icon-x": `${shown.x}%`,
@@ -5735,6 +5780,12 @@ const DesktopIcon = ({
     >
       <img src={icon} alt="" draggable={false} />
       <span>{label}</span>
+      {callout ? (
+        <em className="desktop-icon-callout" aria-hidden="true">
+          <b>{callout.title}</b>
+          <small>{callout.hint}</small>
+        </em>
+      ) : null}
     </button>
   );
 };
@@ -7001,6 +7052,10 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
     setSelected("certifications-folder");
     addWindow({ kind: "folder", folder: "certifications" });
   };
+  const handleOpenReferencesFolder = () => {
+    setSelected("references-folder");
+    addWindow({ kind: "folder", folder: "references" });
+  };
   const handleOpenIntroMovie = () => {
     setSelected("intro-mov");
     addWindow({ kind: "movie" });
@@ -7017,6 +7072,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
     if (target === "projects") handleOpenProjectsFolder();
     else if (target === "cv") handleOpenCv();
     else if (target === "certifications") handleOpenCertificationsFolder();
+    else if (target === "references") handleOpenReferencesFolder();
     else if (target === "notes") openNotes({ noteId: DEFAULT_NOTE_ID });
     else if (target === "mail") addWindow({ kind: "app", app: "mail" });
     else if (target === "photos") addWindow({ kind: "app", app: "photos" });
@@ -7318,6 +7374,15 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
           onMove={handleMoveIcon}
         />
         <DesktopIcon
+          id="references-folder"
+          label={chrome.references}
+          selected={selected === "references-folder"}
+          position={positionFor(iconPositions, "references-folder")}
+          onSelect={handleSelectIcon}
+          onOpen={handleOpenReferencesFolder}
+          onMove={handleMoveIcon}
+        />
+        <DesktopIcon
           id="cv-pdf"
           label={CV_LABEL}
           icon={PDF_ICON}
@@ -7338,6 +7403,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
           onSelect={handleSelectIcon}
           onOpen={handleOpenIntroMovie}
           onMove={handleMoveIcon}
+          callout={{ title: chrome.aboutMe, hint: chrome.watchFirst }}
         />
         <DesktopIcon
           id="folder"
@@ -7398,6 +7464,13 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
             <SpotifyWidget player={spotify} variant="mobile" onOpen={openSpotify} />
             <MobilePhotoWidget onOpen={handleOpenMemeImage} />
             <MobileFolderLauncher
+              label={chrome.aboutMe}
+              badge
+              launcherKey="intro-mov"
+              icon={INTRO_MOVIE.poster}
+              onOpen={handleOpenIntroMovie}
+            />
+            <MobileFolderLauncher
               label={chrome.projects}
               icon="/os/doc-icons/folder.png"
               onOpen={handleOpenProjectsFolder}
@@ -7409,10 +7482,10 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
               onOpen={handleOpenCertificationsFolder}
             />
             <MobileFolderLauncher
-              label={INTRO_MOVIE.label}
-              launcherKey="intro-mov"
-              icon={INTRO_MOVIE.poster}
-              onOpen={handleOpenIntroMovie}
+              label={chrome.references}
+              launcherKey="references-folder"
+              icon="/os/doc-icons/folder.png"
+              onOpen={handleOpenReferencesFolder}
             />
             <MobileFolderLauncher
               label={CV_LABEL}
@@ -7484,6 +7557,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
               folder={window.content.folder}
               onClose={onClose}
               onOpenVideo={openVideo}
+              onOpenIntro={handleOpenIntroMovie}
               onOpenProject={openProject}
               onOpenPreview={openPreview}
               {...stackProps}

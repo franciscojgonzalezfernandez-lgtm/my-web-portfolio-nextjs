@@ -16,6 +16,7 @@ export type TerminalTarget =
   | "projects"
   | "cv"
   | "certifications"
+  | "references"
   | "notes"
   | "mail"
   | "photos"
@@ -45,6 +46,7 @@ const OPEN_TARGETS: Record<string, TerminalTarget> = {
   cv: "cv",
   "cv.pdf": "cv",
   certifications: "certifications",
+  references: "references",
   notes: "notes",
   about: "notes",
   mail: "mail",
@@ -250,7 +252,7 @@ export default function Terminal({
         }
         print(
           <span>
-            <span className="term-blue">Projects/</span>  <span className="term-blue">My certifications/</span>  CV.pdf  Intro.mov  meme.jpg  meme 2.jpg
+            <span className="term-blue">Projects/</span>  <span className="term-blue">My certifications/</span>  <span className="term-blue">References/</span>  CV.pdf  Intro.mov  meme.jpg  meme 2.jpg
           </span>,
         );
         return;
