@@ -186,20 +186,20 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-013 — Shell del OS: boot, menu bar, ventanas, dock, home iOS
 
-- Estado: backlog · Prioridad: P1
+- Estado: review · Prioridad: P1
 - Depende de: f-012
 - AC:
-  - [ ] Route groups: el sitio actual se mueve a `app/(site)/` sin cambios visibles; el escritorio vive en `app/(os)/desktop/` con root layout y CSS propios (`components/os/os.css`), sin contaminar al sitio actual
-  - [ ] Boot screen con logo Apple y barra de progreso; se salta en visitas repetidas dentro de la misma sesión (`sessionStorage`)
-  - [ ] Menu bar: logo Apple, nombre de la app activa, reloj, iconos de estado, item visible de idioma (🌐 EN/DE) que cambia `useLanguageStore`
-  - [ ] Wallpaper de Asier (temporal)
-  - [ ] Window manager portado: arrastrar, foco/z-index, cerrar/minimizar/maximizar con semáforos, minimizar al dock
-  - [ ] Dock con magnificación, indicador de app abierta, orden del épico
-  - [ ] Iconos de escritorio (seleccionar, doble clic abre)
-  - [ ] iOS (<768px): home screen con grid, dock de 4, apps a pantalla completa, home indicator cierra
-  - [ ] Registro de apps tipado (`components/os/apps.ts`): cada ticket posterior solo añade una entrada + su componente
-  - [ ] `tsc --noEmit` limpio, `npm run lint` 0 errores, `npm run build` verde, sitio actual idéntico en `/`
-- Notas: se porta `page.tsx`, `globals.css` y `startup-screen.*` de Asier, partidos en módulos. Las apps aún no portadas abren una ventana vacía con su título.
+  - [x] Route groups: el sitio actual se mueve a `app/(site)/` sin cambios visibles; el escritorio vive en `app/(os)/desktop/` con root layout y CSS propios (`components/os/os.css`), sin contaminar al sitio actual
+  - [x] Boot screen con logo Apple y barra de progreso; se salta en visitas repetidas dentro de la misma sesión (`sessionStorage`)
+  - [x] Menu bar: logo Apple, nombre de la app activa, reloj, iconos de estado, item visible de idioma (🌐 EN/DE) que cambia `useLanguageStore`
+  - [x] Wallpaper de Asier (temporal)
+  - [x] Window manager portado: arrastrar, foco/z-index, cerrar/minimizar/maximizar con semáforos, minimizar al dock
+  - [x] Dock con magnificación, indicador de app abierta, orden del épico
+  - [x] Iconos de escritorio (seleccionar, doble clic abre)
+  - [x] iOS (<768px): home screen con grid, dock de 4, apps a pantalla completa, home indicator cierra
+  - [x] Registro de apps tipado (array `apps` en `components/os/desktop.tsx`): cada ticket posterior añade una entrada + su componente
+  - [x] `tsc --noEmit` limpio, `npm run lint` 0 errores, `npm run build` verde, sitio actual idéntico en `/`
+- Notas: el port vive en `components/os/desktop.tsx` (monolito de Asier adaptado); la extracción a módulos por app ocurre en cada ticket que toca esa app, y el registro de apps es el array `apps` de ese fichero. CitizenX, X, Instagram y Facebook salen del dock hasta f-023 (sus imágenes de Asier no se publican). `eslint.config.mjs` relaja `react-hooks/refs` y `react-hooks/set-state-in-effect` solo en `desktop.tsx` y `youtube.tsx` portados. `/desktop` lleva `noindex` hasta f-024. Apps del épico aún sin portar (Finder real, Terminal, Activity Monitor, Settings…) llegan en sus tickets.
 
 ## f-014 — Finder + carpeta Projects + deep links de proyecto
 

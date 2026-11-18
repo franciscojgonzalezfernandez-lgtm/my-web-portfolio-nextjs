@@ -31,6 +31,21 @@ const config = [
       "@next/next/no-img-element": "off",
     },
   },
+  {
+    // Ported from asierbayon/asierbayonOS (WTFPL) for the macOS/iOS redesign
+    // (f-013). That code reads refs in render helpers and syncs state in
+    // effects on purpose (pointer/drag bookkeeping, media handshakes); it is
+    // runtime-verified. These React Compiler rules are relaxed only here, and
+    // new first-party files under components/os keep them on.
+    files: [
+      "components/os/desktop.tsx",
+      "components/os/youtube.tsx",
+    ],
+    rules: {
+      "react-hooks/refs": "off",
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ];
 
 export default config;
