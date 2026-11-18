@@ -8,11 +8,13 @@ import { ADOBE_INTEGRATION } from "./projects/AdobeExperience.project.data";
 import { CUSTOMER_PORTAL } from "./projects/CustomerPortal.project.data";
 import { TRADING_ALGORITHM } from "./projects/TradingAlgorithm.project.data";
 import { BETTER_AUTH_SHOWCASE } from "./projects/BetterAuth.project.data";
+import { RIDE_FLUMSERBERG } from "./projects/RideFlumserberg.project.data";
 
 // FULL_STACK_CALENDAR (data/projects/FullStackCalendar.data.ts) is intentionally
 // not listed: the project is hidden from the site. Re-add it here to bring back
 // the portfolio card, its /portfolio/full-stack-calendar page and its sitemap entry.
 export const projects: Project[] = [
+  RIDE_FLUMSERBERG,
   BETTER_AUTH_SHOWCASE,
   PERSONAL_PORTFOLIO,
   ECOMMERCE_PLATFORM,

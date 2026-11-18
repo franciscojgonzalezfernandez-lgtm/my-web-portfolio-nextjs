@@ -2,6 +2,43 @@ import { Experience } from "@/interfaces/experience.interface";
 
 export const experiences: Experience[] = [
   {
+    role: "Founder, Software Engineer & Snowboard Instructor",
+    roleGerman: "Gründer, Software Engineer & Snowboardlehrer",
+    roleSpanish: "Fundador, Software Engineer y profesor de snowboard",
+    company: "Ride Flumserberg",
+    companyLink: "https://rideflumserberg.ch",
+    period: "May 2026 - Now",
+    description:
+      "I founded my own snowboard school in Flumserberg, registered as a sole proprietorship, and built its booking platform end to end. On the mountain I teach private lessons in English, German and Spanish; off it I run the product, the brand and the business.",
+    descriptionGerman:
+      "Ich habe meine eigene Snowboardschule in Flumserberg gegründet, als Einzelfirma angemeldet, und ihre Buchungsplattform von Anfang bis Ende gebaut. Am Berg gebe ich Privatstunden auf Englisch, Deutsch und Spanisch; daneben verantworte ich Produkt, Marke und Geschäft.",
+    descriptionSpanish:
+      "He fundado mi propia escuela de snowboard en Flumserberg, registrada como empresa individual, y he construido de principio a fin su plataforma de reservas. En la montaña doy clases particulares en inglés, alemán y español; fuera de ella llevo el producto, la marca y el negocio.",
+    achievements: [
+      "Built and shipped a production booking platform (Next.js 15, Prisma + Neon, Better Auth, Stripe with TWINT, Resend, Sentry) with a trilingual booking flow, an admin cockpit and an instructor panel — live since May 2026 and taking real payments.",
+      "Worked AI-first with Claude Code: tickets as the source of scope, agents to locate, plan, build and review, CI with Vitest and Playwright, automatic database migrations and a smoke test against production after every deploy.",
+      "Took a business from zero in a new country: legal registration, pricing, brand, website, marketing with QR flyers and tracked campaigns, and the lessons themselves in three languages.",
+    ],
+    achievementsGerman: [
+      "Eine produktive Buchungsplattform gebaut und ausgeliefert (Next.js 15, Prisma + Neon, Better Auth, Stripe mit TWINT, Resend, Sentry) mit dreisprachigem Buchungsablauf, Admin-Cockpit und Instructor-Panel — live seit Mai 2026 und mit echten Zahlungen.",
+      "AI-first mit Claude Code gearbeitet: Tickets als Quelle für den Umfang, Agents zum Finden, Planen, Bauen und Reviewen, CI mit Vitest und Playwright, automatische Datenbank-Migrationen und ein Smoke-Test gegen Produktion nach jedem Deploy.",
+      "Ein Geschäft in einem neuen Land von null aufgebaut: rechtliche Anmeldung, Preise, Marke, Website, Marketing mit QR-Flyern und messbaren Kampagnen und der Unterricht selbst in drei Sprachen.",
+    ],
+    achievementsSpanish: [
+      "He construido y puesto en producción una plataforma de reservas (Next.js 15, Prisma + Neon, Better Auth, Stripe con TWINT, Resend, Sentry) con reservas en tres idiomas, panel de administración y panel de instructor; en producción desde mayo de 2026 y cobrando pagos reales.",
+      "He trabajado AI-first con Claude Code: tickets como fuente del alcance, agentes para localizar, planificar, construir y revisar, CI con Vitest y Playwright, migraciones de base de datos automáticas y un smoke test contra producción después de cada deploy.",
+      "He levantado un negocio desde cero en un país nuevo: alta legal, precios, marca, web, marketing con flyers con QR y campañas medidas, y las propias clases en tres idiomas.",
+    ],
+    relatedProjects: [
+      {
+        label: "Ride Flumserberg platform",
+        labelGerman: "Ride-Flumserberg-Plattform",
+        labelSpanish: "Plataforma Ride Flumserberg",
+        url: "/ride-flumserberg",
+      },
+    ],
+  },
+  {
     role: "SENIOR SOFTWARE ENGINEER – AI-Driven Product Development",
     roleGerman: "SENIOR SOFTWARE ENGINEER – AI‑gesteuerte Produktentwicklung",
     roleSpanish: "SENIOR SOFTWARE ENGINEER – Desarrollo de producto impulsado por IA",

@@ -394,3 +394,16 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
   - [ ] El CSS emitido ya no contiene reglas `prefers-color-scheme`
   - [ ] `tsc`, `lint`, `build`, `npm ci` limpio y navegador sin cambios visuales
 - Notas: detectado en f-025. Nada de esto se renderiza desde el cutover a `/` (f-024).
+
+## f-030 — Ride Flumserberg: experiencia y proyecto
+
+- Estado: review · Prioridad: P1
+- Depende de: f-028
+- AC:
+  - [x] Nuevo proyecto `ride-flumserberg` (Profesional, publicado 16-05-2026 = primer deploy a producción) en EN/DE/ES, primero en la carpeta Projects; enlaces a rideflumserberg.ch y al repo
+  - [x] Contenido sacado del README del repo y de la web: producto (reserva en 5 pasos, Stripe + TWINT, admin, panel de instructor, emails), ingeniería (Next.js 15, Prisma + Neon, Better Auth, CI, Sentry) y la parte personal (escuela propia, Einzelfirma, clases en tres idiomas)
+  - [x] 7 capturas del repo convertidas a WebP en `public/ride-flumserberg-*.webp`
+  - [x] Nueva experiencia "Ride Flumserberg" (May 2026 - Now) la primera en Notes > Experience, con enlace al proyecto
+  - [x] `/portfolio/ride-flumserberg` generado en `out/` y en `sitemap.xml`
+  - [x] `tsc`, `lint`, `build` y navegador (EN/DE/ES)
+- Notas: el vídeo del proyecto queda pendiente (owner); cuando exista va en `videoUrl`.
