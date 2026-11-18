@@ -217,13 +217,14 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-015 — Notes: About, Experience, Hobbies
 
-- Estado: backlog · Prioridad: P1
+- Estado: review · Prioridad: P1
 - Depende de: f-013
 - AC:
-  - [ ] Notes portado (sidebar de carpetas, lista, cuerpo)
-  - [ ] Notas: "About — Professional", "About — Personal" (de `data/aboutMe.*`), una nota por trabajo de `data/experiences.data.ts` con logros, "Hobbies" (snowboard en Flumserberg, fuerza, lectura, vídeo, podcast; fotos y links a YouTube)
-  - [ ] Todo el texto cambia con el idioma (EN/DE)
-  - [ ] Gates de f-013
+  - [x] Notes portado (sidebar de carpetas, lista, cuerpo)
+  - [x] Notas: "About — Professional", "About — Personal" (de `data/aboutMe.*`), una nota por trabajo de `data/experiences.data.ts` con logros, "Hobbies" (snowboard en Flumserberg, fuerza, lectura, vídeo, podcast; fotos y links a YouTube)
+  - [x] Todo el texto cambia con el idioma (EN/DE)
+  - [x] Gates de f-013
+- Notas: datos en `components/os/notes-data.ts` (`buildNoteFolders(language)`), carpetas About me / Experience / Hobbies / Projects. Los proyectos relacionados de cada experiencia abren la ventana del proyecto (f-014). La nota "About Javi" provisional de f-013 desaparece. También corrige el breakpoint móvil de `project-window.css` a 700px (el de Asier).
 
 ## f-016 — Preview: CV.pdf, My certifications, memes
 
