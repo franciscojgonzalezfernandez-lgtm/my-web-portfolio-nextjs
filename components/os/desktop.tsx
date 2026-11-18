@@ -64,6 +64,13 @@ import {
 import { projects as portfolioProjects } from "@/data/projects.data";
 import { trackProjectClick } from "@/lib/analytics";
 import ProjectDocument from "./project-window";
+import PreviewDocument, {
+  certificateDocs,
+  certificateLabel,
+  CV_LABEL,
+  findCertificate,
+  type PreviewDoc,
+} from "./preview-document";
 import {
   buildNoteFolders,
   DEFAULT_NOTE_ID,
@@ -138,6 +145,7 @@ type WindowState =
   | { kind: "app"; app: WindowAppId }
   | { kind: "folder"; folder: FolderId }
   | { kind: "project"; slug: string }
+  | { kind: "preview"; doc: PreviewDoc }
   | { kind: "video" }
   | { kind: "spotify" }
   | { kind: "youtube" }
@@ -152,7 +160,7 @@ type OpenWindow = {
   minimizedAt: number | null;
 };
 
-type FolderId = "secret" | "projects";
+type FolderId = "secret" | "projects" | "certifications";
 
 type DeepLinkTarget = { kind: "project"; slug: string } | { kind: "folder"; folder: "projects" };
 
@@ -170,6 +178,8 @@ export const readDeepLink = (search: string): DeepLinkTarget | null => {
 const windowKey = (content: WindowState) => {
   if (content.kind === "folder") return content.folder === "secret" ? null : `folder:${content.folder}`;
   if (content.kind === "project") return `project:${content.slug}`;
+  if (content.kind === "preview")
+    return content.doc.kind === "cv" ? "preview:cv" : `preview:cert:${content.doc.id}`;
   if (content.kind === "image") return `image:${content.memeId}`;
   if (content.kind === "app") return `app:${content.app}`;
   return content.kind;
@@ -1542,11 +1552,20 @@ function AppWindow({
   );
 }
 
+const PDF_ICON = "/os/doc-icons/pdf.svg";
+const FOLDER_TITLES: Record<FolderId, string> = {
+  secret: "Don't Open",
+  projects: "Projects",
+  certifications: "My certifications",
+};
+
 type FolderItem = {
   id: string;
   label: string;
   meta?: string;
   thumbnail?: string;
+  // File-type icon instead of a content thumbnail: drawn whole, not cropped.
+  isFileIcon?: boolean;
   onOpen: () => void;
 };
 
@@ -1555,14 +1574,17 @@ function FolderWindow({
   onClose,
   onOpenVideo,
   onOpenProject,
+  onOpenPreview,
   ...stackProps
 }: {
   folder: FolderId;
   onClose: () => void;
   onOpenVideo: () => void;
   onOpenProject: (slug: string) => void;
+  onOpenPreview: (doc: PreviewDoc) => void;
 } & WindowStackProps) {
-  const title = folder === "projects" ? "Projects" : "Don't Open";
+  const isGerman = useLanguageStore((state) => state.language) === "german";
+  const title = FOLDER_TITLES[folder];
   const items: FolderItem[] =
     folder === "projects"
       ? portfolioProjects.map((project) => ({
@@ -1572,7 +1594,17 @@ function FolderWindow({
           thumbnail: project.images[0],
           onOpen: () => onOpenProject(project.slug),
         }))
-      : [];
+      : folder === "certifications"
+        ? certificateDocs.map((certificate) => ({
+            id: certificate.id,
+            label: certificateLabel(certificate, isGerman),
+            meta: certificate.date,
+            thumbnail: PDF_ICON,
+            isFileIcon: true,
+            onOpen: () => onOpenPreview({ kind: "certificate", id: certificate.id }),
+          }))
+        : [];
+  const hasItems = folder !== "secret";
   const sidebar = [
     {
       title: "iCloud",
@@ -1660,7 +1692,7 @@ function FolderWindow({
               </div>
             ))}
           </aside>
-          {folder === "projects" ? (
+          {hasItems ? (
             <div className="finder-files finder-grid">
               {items.map((item) => (
                 <button
@@ -1677,7 +1709,7 @@ function FolderWindow({
                     if ((event.nativeEvent as PointerEvent).pointerType !== "mouse") item.onOpen();
                   }}
                 >
-                  <span className="finder-thumb">
+                  <span className={`finder-thumb ${item.isFileIcon ? "finder-thumb-icon" : ""}`}>
                     {item.thumbnail ? <img src={item.thumbnail} alt="" loading="lazy" /> : null}
                   </span>
                   <strong>{item.label}</strong>
@@ -1707,14 +1739,14 @@ function FolderWindow({
             Macintosh HD <b>›</b> Users <b>›</b> javi <b>›</b> Desktop <b>›</b>{" "}
             <strong>{title}</strong>
           </div>
-          <span>{folder === "projects" ? `${items.length} items` : "1 item"}</span>
+          <span>{hasItems ? `${items.length} items` : "1 item"}</span>
         </div>
       </div>
       <FilesApp
         title={title}
         onBack={onClose}
         onOpenVideo={onOpenVideo}
-        items={folder === "projects" ? items : undefined}
+        items={hasItems ? items : undefined}
       />
     </WindowShell>
   );
@@ -1832,7 +1864,7 @@ const FilesApp = ({ title, onBack, onOpenVideo, items }: FilesAppProps) => (
               aria-label={`Open ${item.label}`}
               onClick={item.onOpen}
             >
-              <span className="files-thumb">
+              <span className={`files-thumb ${item.isFileIcon ? "files-thumb-icon" : ""}`}>
                 {item.thumbnail ? <img src={item.thumbnail} alt="" loading="lazy" /> : null}
               </span>
               <strong>{item.label}</strong>
@@ -4144,7 +4176,7 @@ const DESKTOP_WIDGET_HEIGHT = 166;
 const DESKTOP_WIDGET_GAP = 16;
 const SPOTIFY_WIDGET_LAYOUT_KEY = "javi-os-spotify-widget-layout";
 const SPOTIFY_WIDGET_LAYOUT = "square-below-weather";
-const FIXED_DESKTOP_ICON_IDS = ["projects-folder"] as const;
+const FIXED_DESKTOP_ICON_IDS = ["projects-folder", "certifications-folder", "cv-pdf"] as const;
 const STRAY_ICON_ID = "folder";
 const STRAY_ICON_ANCHOR = { x: 0.21, y: 0.64 };
 const FALLBACK_DESKTOP_SIZE: DesktopSize = { width: 1440, height: 872 };
@@ -5450,7 +5482,7 @@ const DesktopIcon = ({
   id: string;
   label: string;
   icon?: string;
-  variant?: "folder" | "picture";
+  variant?: "folder" | "picture" | "document";
   selected: boolean;
   position: IconPosition;
   onSelect: (id: string) => void;
@@ -6285,10 +6317,19 @@ const describeMinimizedWindow = (item: OpenWindow): MinimizedWindowTile => {
       variant: "paper",
     };
   }
+  if (content.kind === "preview") {
+    const certificate = content.doc.kind === "certificate" ? findCertificate(content.doc.id) : null;
+    return {
+      id,
+      label: certificate ? certificateLabel(certificate, false) : CV_LABEL,
+      icon: PDF_ICON,
+      variant: "paper",
+    };
+  }
   if (content.kind === "folder") {
     return {
       id,
-      label: content.folder === "projects" ? "Projects" : "Don't Open",
+      label: FOLDER_TITLES[content.folder],
       icon: "/os/doc-icons/folder.png",
       variant: "paper",
     };
@@ -6684,6 +6725,17 @@ export default function Home() {
     if (target.kind === "project") openProject(target.slug);
     else addWindow({ kind: "folder", folder: target.folder });
   });
+  const openPreview = (doc: PreviewDoc) => {
+    addWindow({ kind: "preview", doc });
+  };
+  const handleOpenCertificationsFolder = () => {
+    setSelected("certifications-folder");
+    addWindow({ kind: "folder", folder: "certifications" });
+  };
+  const handleOpenCv = () => {
+    setSelected("cv-pdf");
+    openPreview({ kind: "cv" });
+  };
   const handleOpenSecretFolder = () => {
     setSelected("folder");
     addWindow({ kind: "folder", folder: "secret" });
@@ -6932,6 +6984,26 @@ export default function Home() {
           onMove={handleMoveIcon}
         />
         <DesktopIcon
+          id="certifications-folder"
+          label="My certifications"
+          selected={selected === "certifications-folder"}
+          position={positionFor(iconPositions, "certifications-folder")}
+          onSelect={handleSelectIcon}
+          onOpen={handleOpenCertificationsFolder}
+          onMove={handleMoveIcon}
+        />
+        <DesktopIcon
+          id="cv-pdf"
+          label={CV_LABEL}
+          icon={PDF_ICON}
+          variant="document"
+          selected={selected === "cv-pdf"}
+          position={positionFor(iconPositions, "cv-pdf")}
+          onSelect={handleSelectIcon}
+          onOpen={handleOpenCv}
+          onMove={handleMoveIcon}
+        />
+        <DesktopIcon
           id="folder"
           label="Don't Open"
           selected={selected === "folder"}
@@ -6993,6 +7065,18 @@ export default function Home() {
               label="Projects"
               icon="/os/doc-icons/folder.png"
               onOpen={handleOpenProjectsFolder}
+            />
+            <MobileFolderLauncher
+              label="Certifications"
+              launcherKey="certifications-folder"
+              icon="/os/doc-icons/folder.png"
+              onOpen={handleOpenCertificationsFolder}
+            />
+            <MobileFolderLauncher
+              label={CV_LABEL}
+              launcherKey="cv-pdf"
+              icon={PDF_ICON}
+              onOpen={handleOpenCv}
             />
             {apps
               .filter(
@@ -7068,9 +7152,24 @@ export default function Home() {
               onClose={onClose}
               onOpenVideo={openVideo}
               onOpenProject={openProject}
+              onOpenPreview={openPreview}
               {...stackProps}
             />
           );
+        if (window.content.kind === "preview") {
+          const { doc } = window.content;
+          const certificate = doc.kind === "certificate" ? findCertificate(doc.id) : null;
+          return (
+            <WindowShell
+              key={window.id}
+              title={certificate ? certificateLabel(certificate, false) : CV_LABEL}
+              onClose={onClose}
+              {...stackProps}
+            >
+              <PreviewDocument doc={doc} />
+            </WindowShell>
+          );
+        }
         if (window.content.kind === "project") {
           const { slug } = window.content;
           const project = portfolioProjects.find((entry) => entry.slug === slug);

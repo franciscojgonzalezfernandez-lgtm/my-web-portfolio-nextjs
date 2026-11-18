@@ -228,14 +228,15 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-016 — Preview: CV.pdf, My certifications, memes
 
-- Estado: backlog · Prioridad: P1
+- Estado: review · Prioridad: P1
 - Depende de: f-013
 - AC:
-  - [ ] `CV.pdf` en el escritorio abre Preview con el PDF renderizado (pdf.js) y botón Download (`trackCvDownload`)
-  - [ ] Carpeta `My certifications` en el escritorio; cada certificación de `data/certifications.data.ts` abre Preview con iframe de Drive (`/file/d/ID/preview`) y botón "Open in Drive"
-  - [ ] Memes de Asier en el escritorio, abren en Preview
-  - [ ] Funciona en iOS Safari
-  - [ ] Gates de f-013
+  - [x] `CV.pdf` en el escritorio abre Preview con el PDF renderizado (pdf.js) y botón Download (`trackCvDownload`)
+  - [x] Carpeta `My certifications` en el escritorio; cada certificación de `data/certifications.data.ts` abre Preview con iframe de Drive (`/file/d/ID/preview`) y botón "Open in Drive"
+  - [x] Memes de Asier en el escritorio, abren en Preview
+  - [x] Funciona en iOS (lanzadores CV.pdf y Certifications en la home; ventana a pantalla completa)
+  - [x] Gates de f-013
+- Notas: `components/os/preview-document.tsx` (pdf.js `pdfjs-dist@4.10.38`, worker emitido por el bundler en `_next/static/media/*.mjs`, GitHub Pages lo sirve como JS). Los memes de Asier ya se abrían en Preview con su editor de marcas desde f-013. Verificado en `out/` servido en local; el render se pausa si la pestaña no es visible (pdf.js pinta con `requestAnimationFrame`), comportamiento esperado. Requisito del owner: los ficheros de Drive deben seguir compartidos como "cualquiera con el enlace".
 
 ## f-017 — QuickTime (Intro.mov) + Photos
 
