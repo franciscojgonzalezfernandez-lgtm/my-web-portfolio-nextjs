@@ -271,11 +271,12 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-020 — Terminal + GitHub activity
 
-- Estado: backlog · Prioridad: P2
+- Estado: review · Prioridad: P2
 - Depende de: f-013
 - AC:
-  - [ ] Terminal con prompt `javi@macbook ~ %`, comandos `help`, `whoami`, `ls`, `ls projects`, `open <app|proyecto>`, `open cv`, `lang en|de`, `git log` (actividad de GitHub de `GitHubActivity`), `clear`, easter eggs (`sudo`, `matrix`)
-  - [ ] Gates de f-013
+  - [x] Terminal con prompt `javi@macbook ~ %`, comandos `help`, `whoami`, `ls`, `ls projects`, `open <app|proyecto>`, `open cv`, `lang en|de`, `git log` (actividad de GitHub de `GitHubActivity`), `clear`, easter eggs (`sudo`, `matrix`)
+  - [x] Gates de f-013
+- Notas: `components/os/terminal.tsx`. `git log` lee la API pública de eventos de GitHub en el cliente (60 req/h por IP, sin token). Desde 2025 GitHub ya no incluye commits en los `PushEvent` públicos, así que se muestran push/PR/review/create por repo. Extras: `neofetch`, `github` (gráfico de actividad), historial con ↑/↓, Ctrl+L, `matrix` usa el `MatrixRain` de Asier.
 
 ## f-021 — Activity Monitor, Freeform, About This Mac
 

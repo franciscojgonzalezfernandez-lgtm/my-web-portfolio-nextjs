@@ -70,6 +70,7 @@ import {
 } from "@/lib/analytics";
 import ProjectDocument from "./project-window";
 import MoviePlayer, { INTRO_MOVIE } from "./movie-window";
+import Terminal, { type TerminalTarget } from "./terminal";
 import PreviewDocument, {
   certificateDocs,
   certificateLabel,
@@ -113,6 +114,7 @@ const apps = [
   { id: "mail", name: "Mail", icon: "/os/doc-icons/mail.png" },
   { id: "youtube", name: "YouTube", icon: "/os/doc-icons/youtube.svg" },
   { id: "spotify", name: "Spotify", icon: "/os/doc-icons/spotify.svg" },
+  { id: "terminal", name: "Terminal", icon: "/os/doc-icons/terminal.svg" },
   { id: "weather", name: "Weather", icon: "/os/doc-icons/weather.svg" },
   { id: "chatgpt", name: "ChatGPT", icon: "/os/doc-icons/chatgpt.svg" },
   {
@@ -144,7 +146,7 @@ const isMobileDockApp = (
 type LinkedAppId = Extract<DockApp, { href: string }>["id"];
 type WindowAppId = Exclude<
   AppId,
-  LinkedAppId | "notes" | "spotify" | "youtube" | "weather"
+  LinkedAppId | "notes" | "spotify" | "youtube" | "weather" | "terminal"
 >;
 type NotesTarget = { noteId: string; view?: NotesView };
 type WindowState =
@@ -154,6 +156,7 @@ type WindowState =
   | { kind: "project"; slug: string }
   | { kind: "preview"; doc: PreviewDoc }
   | { kind: "movie" }
+  | { kind: "terminal" }
   | { kind: "video" }
   | { kind: "spotify" }
   | { kind: "youtube" }
@@ -187,6 +190,7 @@ const windowKey = (content: WindowState) => {
   if (content.kind === "folder") return content.folder === "secret" ? null : `folder:${content.folder}`;
   if (content.kind === "project") return `project:${content.slug}`;
   if (content.kind === "movie") return "movie";
+  if (content.kind === "terminal") return "terminal";
   if (content.kind === "preview")
     return content.doc.kind === "cv" ? "preview:cv" : `preview:cert:${content.doc.id}`;
   if (content.kind === "image") return `image:${content.memeId}`;
@@ -1256,6 +1260,7 @@ const ICON_PLATE: Record<AppId, number> = {
   mail: 840 / 1024,
   linkedin: 1,
   github: 1,
+  terminal: 1,
   trash: 862 / 1024,
 };
 
@@ -6363,7 +6368,15 @@ const windowAppId = ({ content }: OpenWindow) => {
 const byMinimizeOrder = (first: OpenWindow, second: OpenWindow) =>
   (first.minimizedAt ?? 0) - (second.minimizedAt ?? 0);
 
-const DARK_SURFACE_IDS = new Set<string>(["spotify", "youtube", "instagram", "weather", "video", "movie"]);
+const DARK_SURFACE_IDS = new Set<string>([
+  "spotify",
+  "youtube",
+  "instagram",
+  "weather",
+  "video",
+  "movie",
+  "terminal",
+]);
 
 const describeMinimizedWindow = (item: OpenWindow): MinimizedWindowTile => {
   const { id, content } = item;
@@ -6375,6 +6388,9 @@ const describeMinimizedWindow = (item: OpenWindow): MinimizedWindowTile => {
       preview: project?.images[0],
       variant: "paper",
     };
+  }
+  if (content.kind === "terminal") {
+    return { id, label: "Terminal", icon: "/os/doc-icons/terminal.svg", variant: "dark" };
   }
   if (content.kind === "movie") {
     return { id, label: INTRO_MOVIE.label, preview: INTRO_MOVIE.poster, variant: "dark" };
@@ -6802,6 +6818,22 @@ export default function Home() {
     // One audible source at a time: the intro pauses the music.
     if (spotify.isPlaying) spotify.togglePlay();
   };
+  const openFromTerminal = (target: TerminalTarget) => {
+    if (typeof target === "object") {
+      openProject(target.project);
+      return true;
+    }
+    if (target === "projects") handleOpenProjectsFolder();
+    else if (target === "cv") handleOpenCv();
+    else if (target === "certifications") handleOpenCertificationsFolder();
+    else if (target === "notes") openNotes({ noteId: DEFAULT_NOTE_ID });
+    else if (target === "mail") addWindow({ kind: "app", app: "mail" });
+    else if (target === "photos") addWindow({ kind: "app", app: "photos" });
+    else if (target === "youtube") openYouTube();
+    else if (target === "spotify") openSpotify();
+    else if (target === "intro") handleOpenIntroMovie();
+    return true;
+  };
   const handleOpenCv = () => {
     setSelected("cv-pdf");
     openPreview({ kind: "cv" });
@@ -6846,6 +6878,10 @@ export default function Home() {
     setSelected(app.id);
     if (app.id === "notes") {
       openNotes({ noteId: DEFAULT_NOTE_ID });
+      return;
+    }
+    if (app.id === "terminal") {
+      addWindow({ kind: "terminal" });
       return;
     }
     if (app.id === "spotify") {
@@ -7245,6 +7281,18 @@ export default function Home() {
               onOpenPreview={openPreview}
               {...stackProps}
             />
+          );
+        if (window.content.kind === "terminal")
+          return (
+            <WindowShell
+              key={window.id}
+              title="javi — -zsh — 80×24"
+              onClose={onClose}
+              variant="dark"
+              {...stackProps}
+            >
+              <Terminal onOpen={openFromTerminal} onExit={onClose} />
+            </WindowShell>
           );
         if (window.content.kind === "movie")
           return (
