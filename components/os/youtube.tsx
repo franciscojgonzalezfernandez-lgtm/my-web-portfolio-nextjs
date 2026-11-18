@@ -1,5 +1,7 @@
 "use client";
 
+import { CustomVideo } from "@/components/high-order-components/CustomVideo";
+
 import {
   useEffect,
   useRef,
@@ -17,6 +19,9 @@ import {
   youtubeLibrary,
   youtubePlaylists,
   youtubeThumbnail,
+  isLocalVideo,
+  JAVI_CHANNEL,
+  JAVI_CHANNEL_URL,
   youtubeVideos,
   YOUTUBE_ORIGIN,
   YOUTUBE_STATE,
@@ -186,7 +191,7 @@ const VideoCard = ({ video, variant, isCurrent = false, onSelect }: VideoCardPro
     >
       <img
         className="yt-card-thumb"
-        src={youtubeThumbnail(video.videoId)}
+        src={video.thumbnail ?? youtubeThumbnail(video.videoId)}
         alt=""
         loading="lazy"
       />
@@ -224,7 +229,7 @@ const PlaylistCard = ({ playlist, variant, onSelect }: PlaylistCardProps) => {
       <span className="yt-playlist-thumb">
         <img
           className="yt-card-thumb"
-          src={youtubeThumbnail(firstVideo.videoId)}
+          src={firstVideo.thumbnail ?? youtubeThumbnail(firstVideo.videoId)}
           alt=""
           loading="lazy"
         />
@@ -625,6 +630,21 @@ export default function YouTubeApp({
     return (
       <div className="yt-watch">
         <section className="yt-watch-primary" aria-label={video.title}>
+          {isLocalVideo(video) ? (
+            <div className="yt-player yt-local-player">
+              <CustomVideo
+                key={video.videoId}
+                src={video.localSrc ?? ""}
+                poster={video.thumbnail}
+                title={video.title}
+                controls
+                autoPlay
+                playsInline
+                onPlay={onClaimPlayback}
+                onEnded={onReleasePlayback}
+              />
+            </div>
+          ) : (
           <VideoPlayer
             key={video.videoId}
             iframeRef={playerFrameRef}
@@ -637,12 +657,19 @@ export default function YouTubeApp({
             onStateChange={setPlayerState}
             onEnded={handleVideoEnded}
           />
+          )}
           <h2 className="yt-watch-title">{video.title}</h2>
           <div className="yt-channel-row">
             <img className="yt-avatar" src={video.cover} alt="" />
             <span className="yt-card-text">
               <b>{video.artist}</b>
-              <small>Channel</small>
+              {video.artist === JAVI_CHANNEL ? (
+                <a href={JAVI_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
+                  @javi-tricker
+                </a>
+              ) : (
+                <small>Channel</small>
+              )}
             </span>
             <button
               type="button"
@@ -698,9 +725,15 @@ export default function YouTubeApp({
             <YouTubeIcon name="search" />
           </button>
         </form>
-        <span className="yt-account" aria-label="Signed in as Asier" role="img">
-          A
-        </span>
+        <a
+          className="yt-account"
+          href={JAVI_CHANNEL_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Javi's YouTube channel, opens in a new tab"
+        >
+          J
+        </a>
       </header>
 
       <div className="yt-body">
