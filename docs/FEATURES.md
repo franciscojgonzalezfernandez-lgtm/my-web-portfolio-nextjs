@@ -327,14 +327,15 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-025 — Actualizar CLAUDE.md y WORKFLOW.md a la arquitectura OS
 
-- Estado: backlog · Prioridad: P2
-- Depende de: f-024
+- Estado: review · Prioridad: P2
+- Depende de: f-024, f-028
 - AC:
-  - [ ] `CLAUDE.md` describe `components/os/` (desktop.tsx monolito portado + módulos por app), el registro `apps`, las window kinds y los deep links (`open` prop / `?open=`)
-  - [ ] Sección i18n: desaparece el sistema 2 (`lib/intl.ts`, `i18n/`), queda solo `useLanguageStore`, con la guarda de hidratación (`useSyncExternalStore`) para leerlo en render
-  - [ ] Documentado el override de ESLint para `desktop.tsx`/`youtube.tsx` portados y por qué
-  - [ ] Notas de estilo: `os.css` (de Asier) + `project-window.css` (propio); los tokens shadcn/`globals.css` ya no existen; el wallpaper va por `--wallpaper`
-  - [ ] Revisar si `components/ui/` (shadcn) y sus dependencias siguen haciendo falta; si no, ticket aparte para quitarlas
+  - [x] `CLAUDE.md` describe `components/os/` (desktop.tsx monolito portado + módulos propios y portados), las window kinds, la tabla ruta → ventana y los deep links (`open` prop / `?open=`, URL que sigue a la ventana)
+  - [x] Sección i18n: tres idiomas en `useLanguageStore`, campos `*German`/`*Spanish`, `localized()`/`byLanguage()` de `lib/i18n.ts`, `os-i18n.ts`, guarda de hidratación y cómo añadir un idioma; desaparece el sistema 2 (`lib/intl.ts`, `i18n/`)
+  - [x] Documentado el override de ESLint para `desktop.tsx`/`youtube.tsx` portados; comandos corregidos (`lint` funciona, el build falla con errores de tipos)
+  - [x] Notas de estilo: `os.css` (Asier, carga Tailwind) + `project-window.css` (propio); `--wallpaper`; light-only
+  - [x] Revisado `components/ui/` (shadcn): nada lo renderiza → ticket aparte f-029
+  - [x] `docs/WORKFLOW.md`: puerta de calidad con `lint`, verificación en 3 idiomas y 2 viewports, audio con clic real, deep links
 - Notas: convenciones = ticket propio (regla de CLAUDE.md), por eso no va dentro de f-024.
 
 ## f-026 — Fixes de la review impeccable del escritorio
@@ -381,3 +382,15 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
   - [x] Corregida la comilla suelta al inicio de la descripción de Trading Algorithm (EN/DE)
   - [x] `tsc`, `lint`, `build` y navegador (1280×800 y 375×812, ES)
 - Notas: las apps de Asier (Weather, ChatGPT, Instagram, Facebook, Paint, YouTube, Spotify) siguen en inglés en los tres idiomas, como antes en alemán.
+
+## f-029 — Quitar los restos del sitio anterior (shadcn, hooks, globals.css)
+
+- Estado: backlog · Prioridad: P2
+- Depende de: f-025
+- AC:
+  - [ ] Borrar `components/ui/`, `hooks/`, `styles/globals.css`, `components.json` y `lib/utils.ts` si nada los importa
+  - [ ] Quitar de `package.json` las dependencias que solo usaban (`@radix-ui/*`, `next-themes`, `class-variance-authority`, `tailwind-merge`, `tailwindcss-animate`, `react-hook-form`/`@hookform/resolvers`, etc.), comprobando cada una con `grep` antes
+  - [ ] Quitar el ignore de `components/ui/**` y `hooks/use-mobile.ts` de `eslint.config.mjs`
+  - [ ] El CSS emitido ya no contiene reglas `prefers-color-scheme`
+  - [ ] `tsc`, `lint`, `build`, `npm ci` limpio y navegador sin cambios visuales
+- Notas: detectado en f-025. Nada de esto se renderiza desde el cutover a `/` (f-024).

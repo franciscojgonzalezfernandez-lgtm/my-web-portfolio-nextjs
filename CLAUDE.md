@@ -7,48 +7,82 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - [`docs/FEATURES.md`](docs/FEATURES.md) — living backlog, source of truth for ticket scope.
 - [`docs/WORKFLOW.md`](docs/WORKFLOW.md) — subagent loop + per-feature verification.
 
+## What the site is
+
+The portfolio is a fake operating system: a **macOS desktop** on wide screens and an **iOS home screen** on phones (epic f-012..f-028). Projects, CV, certificates, experience and contact all live inside windows and apps. The shell is ported from [asierbayon/asierbayonOS](https://github.com/asierbayon/asierbayonOS) (WTFPL); Javi's content and apps are layered on top.
+
 ## Commands
 
 ```bash
 npm run dev      # dev server on :3000
-npm run build    # static export -> ./out
+npm run build    # static export -> ./out (also type-checks: a type error fails the build)
+npm run lint     # eslint . with eslint.config.mjs (flat config, eslint-config-next)
+npx tsc --noEmit # fastest type check
 npm run deploy   # gh-pages -d out (manual; CI normally handles deploy)
-npx tsc --noEmit # the only way to catch type errors (see below)
 ```
 
-- `npm run lint` is declared as `eslint .` but **eslint is not installed and there is no eslint config** — the script fails. Don't rely on it.
-- There is no test framework in this repo.
-- `next.config.mjs` sets `typescript.ignoreBuildErrors: true`, so `npm run build` passes with broken types. Run `npx tsc --noEmit` after type-level changes.
+- There is no test framework. Verification is `tsc` + `lint` + `build` + a browser check (see `docs/WORKFLOW.md`).
+- `npx serve out -p 4000` after a build shows exactly what GitHub Pages will serve.
 
 ## Static export constraints
 
-`next.config.mjs` sets `output: "export"` and `images.unoptimized: true`. Everything ships as static HTML to GitHub Pages (`.github/workflows/deploy.yml`, triggered on push to `main`).
+`next.config.mjs` sets `output: "export"` and `images.unoptimized: true`. Everything ships as static HTML to GitHub Pages (`.github/workflows/deploy.yml`, triggered on push to `main`, publishes `out/` with the official Pages actions, so `_next/` needs no `.nojekyll`).
 
 Consequences that shape the whole codebase:
-- No server runtime — no route handlers at request time, no server actions, no middleware, no ISR. `app/sitemap.xml.tsx` exports a `GET` that only runs at build time.
+- **No server runtime, ever.** No route handlers at request time, no server actions, no middleware/proxy, no ISR, no `cookies()`/`headers()`. Anything dynamic (weather, GitHub activity, YouTube, Drive previews) is fetched by the visitor's browser.
+- `app/sitemap.ts` is `force-static`: it runs once at build time and emits `out/sitemap.xml`. Its `STATIC_PATHS` list is kept by hand; project URLs come from `data/projects.data.ts`.
 - Dynamic routes must enumerate params: `app/portfolio/[slug]/page.tsx` uses `generateStaticParams()` over `data/projects.data.ts`. A new project needs no route work, only a data entry.
 - `next/image` is not used. Public assets go through the HOCs below so they get the base-path prefix.
 
+## OS architecture (`components/os/`)
+
+Every route renders the same client component, `<Desktop />` from `components/os/desktop.tsx`. Routes only differ in which window opens on load and in their `metadata`:
+
+| Route | Opens |
+|---|---|
+| `/` | nothing (desktop / home screen) |
+| `/about` | Notes → "Professional" |
+| `/experience` | Notes → first experience |
+| `/portfolio` | Finder → Projects folder |
+| `/portfolio/[slug]` | the project window |
+| `/metrics` | Activity Monitor |
+| `/contact` | Mail |
+| `not-found` | desktop |
+
+- **Deep links.** `Desktop` takes `open?: DeepLinkTarget` from the route, and also reads `?open=<kind>:<value>` on any URL (`project:<slug>`, `folder:projects|certifications|references`, `notes:<noteId>`, `app:mail|activity-monitor|freeform|photos`). After load the address bar follows the window in front via `history.replaceState` (`routeForWindow`); Back still leaves the site.
+- **`desktop.tsx` is a ported monolith** (~7.6k lines): boot screen, menu bar, Dock, windows (drag, minimize, z-order), Control Center, the iOS home with pages, app switcher and gestures, plus the `apps` registry. Window content is a `WindowState` union keyed by `kind`: `notes`, `app`, `folder` (`secret` | `projects` | `certifications` | `references`), `project`, `preview`, `movie`, `video`, `image`, `terminal`, `about-mac`, `settings`, `spotify`, `youtube`, `weather`. Add new behaviour in a separate module and wire it in, rather than growing the monolith.
+- **First-party modules** (Javi's apps and content): `project-window.tsx` (project document), `notes-data.ts` (Notes folders built from `data/`), `preview-document.tsx` (CV via pdf.js, certificates via Google Drive `/preview` iframes), `movie-window.tsx` (Intro.mov), `terminal.tsx`, `system-apps.tsx` (Activity Monitor = metrics, Freeform = architectures, About This Mac), `settings-app.tsx`, `language-menu.tsx`, `photo-library.ts`, `console-art.tsx`, `os-i18n.ts`.
+- **Ported modules** (Asier's, adapted): `youtube.tsx`, `media.ts`, `weather.tsx` / `weather-app.tsx` (Open-Meteo, Madrid / Flumserberg / Zurich), `photos.tsx`, `instagram.tsx`, `facebook.tsx`, `chatgpt.tsx`, `startup-screen.tsx`, `offline-playback.tsx`, `use-youtube-connection.tsx`, `matrix-rain.tsx`, `dither-background.tsx`. Their copy stays English in every language.
+- **Audio is exclusive.** Spotify, the YouTube app and the "Dont play this video" window share one `PlaybackGate` (`media.ts`). A window that plays must claim it on mount, not only when opened: React Strict Mode runs the unmount cleanup once in dev and would release the claim (f-027).
+- **Persistence.** Language → `sessionStorage` (`portfolio-language`). Boot screen "already booted" flag → `sessionStorage` (clear it to replay the boot). Desktop icon positions (`javi-os-desktop-icon-positions-v3`), wallpaper (`javi-os-wallpaper`) and meme markup → `localStorage`. Bump the positions key when the default icon layout changes.
+- The desktop is laid out from `FIXED_DESKTOP_ICON_IDS` (Intro.mov first, top right, with the slot to its left kept free for its "About me" callout) followed by the memes. The iOS home splits apps across two pages with `MOBILE_FIRST_PAGE_APPS`; check 375×812 after adding a launcher.
+
 ## Asset handling — always use the HOCs
 
-`components/high-order-components/CustomImage.tsx` and `CustomVideo.tsx` prefix `src` with `process.env.NEXT_PUBLIC_BASE_PATH` (needed for GitHub Pages subpath hosting) unless the src is absolute `http`. Use them instead of raw `<img>` / `<video>` for anything under `public/`.
+`components/high-order-components/CustomImage.tsx` and `CustomVideo.tsx` prefix `src` with `process.env.NEXT_PUBLIC_BASE_PATH` (needed for GitHub Pages subpath hosting) unless the src is absolute `http`. Use them instead of raw `<img>` / `<video>` for anything under `public/` in first-party code. (Ported files use raw `<img>` with `/os/...` paths; the site is served from the domain root, so that works today.)
 
 `CustomVideo` also owns video analytics (play/pause/progress at 25/50/75/complete/unmute) and autoplays muted via IntersectionObserver at 0.25 threshold. Passing your own `onPlay`/`onPause`/etc. is fine — they're called after tracking.
 
-## i18n — two systems, only one is real
+OS assets live in `public/os/` (wallpaper, memes, `doc-icons/`). The CV is `public/CV-Javi.pdf`; replace the file to update it.
 
-**1. Zustand store (the one actually in use).** `stores/useLanguageStore.ts` holds `"german" | "english"`, **defaults to German**, persisted in `sessionStorage` under `portfolio-language`. ~14 components read it directly and branch. Two content shapes exist side by side:
+## i18n — three languages, one store
 
-- Separate files per language, passed as props: `data/hero.data.ts` + `data/hero.data.german.ts` → `<IntroCover data_english={...} data_german={...} />`.
-- Sibling `*German` fields on one object: `Project.title` / `Project.titleGerman`, `Experience.achievements` / `achievementsGerman`.
+`stores/useLanguageStore.ts` holds `Language = "english" | "german" | "spanish"`, **defaults to German**, persisted in `sessionStorage` under `portfolio-language`. There is no translation lookup or i18n library; content is stored per language and picked at render time.
 
-Any new translatable content must follow one of these; there is no translation lookup at runtime.
-
-**2. `lib/intl.ts` + `IntlProviderClient` + `i18n/{en,de}.json` (vestigial).** `app/layout.tsx` hardcodes `const locale = "en"` and reads the JSON with `fs` at build time. Only 4 keys exist and almost nothing consumes `useIntl()`. Don't add content here expecting the language switch to affect it — it won't.
+- **Content fields.** Translatable data uses sibling fields: `title` (English) / `titleGerman` / `titleSpanish`, `achievements` / `achievementsGerman` / `achievementsSpanish`, etc. The interfaces in `interfaces/` require all three, so `tsc` catches a missing translation. Read them with `localized(item, "title", language)` from `lib/i18n.ts`.
+- **Inline copy.** Component strings use a `{ english, german, spanish }` object indexed by language (`COPY[language]`, `LABELS[language]`) or `byLanguage(language, {...})`. Typing those objects with all three keys is what makes `tsc` flag a missing language.
+- **OS chrome** (menu bar, Dock and app names, folder names, item counts, project types, dates) lives in `components/os/os-i18n.ts`: `useOsChrome()`, `appName()`, `projectTypeLabel()`, `formatProjectDate()` (`DATE_LOCALE`: `en-GB`, `de-CH`, `es-ES`). `LANGUAGE_OPTIONS` is the single list every switcher renders.
+- **Hydration.** The static HTML cannot know `sessionStorage`. Read the language in render through `useOsLanguage()` (or `useSyncExternalStore` like it), which returns German until hydration finishes, so server and client markup match.
+- **Switchers.** Menu bar 🌐 item, System Settings → Language & Region, the Control Center tile (cycles EN → DE → ES) and Terminal `lang en|de|es`. `<html lang>` follows the language (`HTML_LANG`).
+- Adding a language: extend `Language` and `LANGUAGES`, `HTML_LANG`, `DATE_LOCALE`, `LANGUAGE_OPTIONS`, every `*Spanish`-style field in `interfaces/` + `data/`, and every inline copy object; `tsc` lists what is left.
 
 ## Data layer
 
-`data/*.data.ts` are typed by `interfaces/*.interface.ts`. Project files live in `data/projects/*.project.data.ts`, each exporting one `Project` const, aggregated (order = display order) in `data/projects.data.ts`. That array feeds the portfolio grid, `/portfolio/[slug]` static params, per-project metadata, and the sitemap.
+`data/*.data.ts` are typed by `interfaces/*.interface.ts`. Project files live in `data/projects/*.project.data.ts`, each exporting one `Project` const, aggregated (order = display order) in `data/projects.data.ts`. That array feeds the Projects folder, Notes → Projects, `/portfolio/[slug]` static params, per-project metadata and the sitemap.
+
+- `data/experiences.data.ts` → Notes → Experience. `data/aboutMe.*.data.ts` → Notes → About me. Hobbies copy is inline in `notes-data.ts`.
+- `data/certifications.data.ts` → Google Drive documents. Each entry has `folder: "certifications" | "references"`, which decides the Finder folder it appears in.
+- `data/metrics.data.ts` → Activity Monitor; `data/architectures.data.ts` → Freeform; `data/technologies.data.ts` → About This Mac.
 
 ## Analytics
 
@@ -60,31 +94,20 @@ GA via `@next/third-parties/google`, id from `NEXT_PUBLIC_GA_ID` (`.env.local` i
 
 ## Styling
 
-- **Tailwind CSS v4**, configured inline via `@theme` in `app/globals.css`. There is no `tailwind.config.ts` — theme edits go in that file.
-- **shadcn/ui**, new-york style, neutral base, CSS variables, lucide icons (`components.json`). Primitives in `components/ui/` are generated — prefer regenerating over hand-editing.
-- Monochrome OKLCH palette. Glows are `rgba(0,0,0,*)` — the site renders in light mode only (see below).
-- `--accent` is near-white (`oklch(0.97 0 0)`). Never use `bg-accent` / `border-accent` for anything that must stay visible — prefer `foreground/20` style tokens. (Known live instance: the footer scroll-to-top button.)
-- **The site is light-only (f-004).** There is no `ThemeProvider` and no `.dark` token block; nothing ever adds the `.dark` class. Only `:root` tokens exist, so style against those and don't add `dark:` variants to first-party components.
-- `@custom-variant dark (&:is(.dark *))` **stays in `app/globals.css` on purpose — do not delete it.** The generated shadcn primitives in `components/ui/` ship 43 `dark:` utilities. The custom variant compiles them to `:is(.dark *)` selectors that never match, keeping them inert. Remove it and Tailwind v4 falls back to its built-in `prefers-color-scheme` dark variant, which switches all of them on for OS-dark visitors against light-only tokens. Verified in the emitted CSS: with the variant, 0 `prefers-color-scheme` rules; without it, the media query appears.
+- Plain CSS, imported once in `app/layout.tsx`: `components/os/os.css` (ported; starts with `@import "tailwindcss"`), `startup-screen.css`, and `project-window.css` (first-party: Javi's apps, the References/About-me additions, window clamps, the iOS close button). Put new first-party styles in `project-window.css` or a new file next to the module, not in `os.css`.
+- Tailwind CSS v4 is still loaded by `os.css` because the ported Instagram/ChatGPT/Facebook apps use utility classes. There is no `tailwind.config.ts`.
+- The wallpaper is a CSS variable, `--wallpaper`, set from Settings (`WALLPAPERS` in `settings-app.tsx`).
+- **Light-only (f-004).** `:root` sets `color-scheme: light`; there is no dark theme. Don't add `dark:` variants or `prefers-color-scheme` rules.
+- Mimic macOS/iOS faithfully (SF-style system font stack, glass blur, Dock shadow); that is the design, not a generic UI.
+- `components/ui/` (shadcn), `hooks/`, `styles/globals.css`, `components.json` and their Radix/`next-themes` dependencies are leftovers of the pre-OS site: nothing renders them. Don't build on them (ticket f-029 removes them). They are still scanned by Tailwind, which is why one inert `prefers-color-scheme` rule appears in the emitted CSS.
 
 ## Animation
 
-Use `motion/react` (package `motion` v12). **Never import `framer-motion`.**
-
-```ts
-ease: [0.16, 1, 0.3, 1]                    // project-standard easing
-initial: { opacity: 0, y: 20-40 }          // entrance from below
-duration: 0.45-0.65
-staggerChildren: 0.08-0.12                 // lists
-delayChildren: 0.05-0.15
-viewport={{ once: true, amount: 0.2 }}     // scroll trigger
-```
-
-Section components (`hero`, `portfolio`, `experience`, `metrics`, `about`, `contact`, `architecture`) are all `"use client"` and follow this vocabulary; match it rather than introducing new curves.
+Use `motion/react` (package `motion` v12). **Never import `framer-motion`.** The OS animations (window open/close, minimize, iOS app launch and home gestures) live in `desktop.tsx` and follow macOS/iOS timing; match what is there. For CSS keyframes in first-party styles use the project easing `cubic-bezier(0.16, 1, 0.3, 1)` and always add a `prefers-reduced-motion: reduce` override.
 
 ## Language of authored content
 
-The site copy is English + German. Existing code comments are a mix of Spanish and English.
+The site copy is English, German and Spanish (Spain). Code comments are mostly English, with some Spanish in older files. Tickets in `docs/FEATURES.md` are written in Spanish.
 
 ---
 
@@ -132,7 +155,7 @@ Trivial commits (typo, mechanical rename) may carry a one-line body, but the `Re
 - [ ] PR opened against `main`, titled `feat(f-XXX): …` / `chore(f-XXX): …` / `docs(f-XXX): …`.
 - [ ] `npx tsc --noEmit` clean and `npm run build` green — the build alone proves nothing, it ignores type errors.
 - [ ] If the ticket touched routes or `data/projects.data.ts`: inspected `out/` directly, not just the route list `next build` prints (it truncates with `[+N more paths]`).
-- [ ] If it touched UI: reviewed with the `impeccable` skill, in both languages.
+- [ ] If it touched UI: checked at 1280×800 and 375×812, in all three languages (EN/DE/ES), and reviewed with the `impeccable` skill for visual changes.
 - [ ] Ticket in `docs/FEATURES.md` moved to `review` (or `done`).
 
 ## Agent workflow
@@ -141,4 +164,4 @@ Full spec in [`docs/WORKFLOW.md`](docs/WORKFLOW.md). In short: `caveman:cavecrew
 
 Two rules that matter most here:
 - Changes to conventions (this file) are their own ticket, never a side effect of a feature.
-- Give the reviewer the static-export context explicitly. Without it, it can't know that `public/sitemap.xml` is what ships and `app/sitemap.xml.tsx` is not.
+- Give the reviewer the static-export context explicitly (no server runtime, `out/` is what ships, every route renders `<Desktop />`). Without it, it suggests server-side fixes that cannot exist here.
