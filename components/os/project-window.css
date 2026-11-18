@@ -459,3 +459,330 @@
     font-size: 12px;
   }
 }
+
+/* f-021: Activity Monitor. */
+.activity-monitor {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  color: #1d1d1f;
+  font-size: 12px;
+}
+.am-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #f6f6f6;
+}
+.am-toolbar b {
+  display: block;
+  font-size: 13px;
+}
+.am-toolbar small {
+  color: #86868b;
+}
+.am-tabs {
+  display: flex;
+  padding: 2px;
+  border-radius: 7px;
+  background: #e3e3e6;
+}
+.am-tabs span {
+  padding: 3px 10px;
+  border-radius: 5px;
+  color: #3a3a3c;
+  font-weight: 500;
+}
+.am-tabs .active {
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.am-table {
+  display: flex;
+  flex-direction: column;
+}
+.am-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) 70px 80px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  font-variant-numeric: tabular-nums;
+}
+.am-row:nth-child(odd):not(.am-head) {
+  background: #f4f5f7;
+}
+.am-head {
+  border-bottom: 1px solid #e5e5e5;
+  color: #6e6e73;
+  font-weight: 600;
+}
+.am-dot {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #30d158;
+}
+.am-score {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.am-bar {
+  height: 6px;
+  max-width: 60%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #30d158, #34c759);
+}
+.am-note {
+  margin: 14px 16px 0;
+  color: #6e6e73;
+  line-height: 1.5;
+}
+.am-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px 16px;
+}
+.am-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  background: #fafafa;
+}
+.am-card svg {
+  width: 100%;
+  height: 40px;
+  border-radius: 6px;
+  background: #111;
+}
+.am-card path {
+  fill: rgba(60, 227, 92, 0.35);
+  stroke: #3ce35c;
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+}
+.am-card b {
+  font-size: 20px;
+}
+.am-card small {
+  color: #6e6e73;
+  line-height: 1.4;
+}
+.am-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px 18px;
+  border-top: 1px solid #e5e5e5;
+  background: #f6f6f6;
+}
+.am-footer p {
+  margin: 4px 0 0;
+  color: #6e6e73;
+  line-height: 1.5;
+}
+.am-footer a {
+  flex: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: #0071e3;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+@media (min-width: 701px) {
+  .window-shell:has(.activity-monitor) {
+    width: min(820px, calc(100vw - 80px));
+    height: min(640px, 84vh);
+  }
+}
+
+/* f-021: Freeform board. */
+.freeform-board {
+  min-height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  justify-content: center;
+  gap: 36px 32px;
+  padding: 40px 32px 56px;
+  background-color: #fbfbfd;
+  background-image: radial-gradient(#d9d9e0 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+.ff-sticky {
+  width: 220px;
+  padding: 18px;
+  background: #ffe066;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  color: #3a3000;
+}
+.ff-sticky b {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+.ff-sticky p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.ff-card {
+  width: 280px;
+  margin: 0;
+  padding: 10px 10px 14px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+  transition: rotate 0.2s ease, scale 0.2s ease;
+}
+.ff-card:hover {
+  rotate: 0deg !important;
+  scale: 1.03;
+}
+.ff-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: block;
+  object-fit: cover;
+}
+.ff-card figcaption {
+  margin-top: 10px;
+  color: #1d1d1f;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+}
+@media (min-width: 701px) {
+  .window-shell:has(.freeform-board) {
+    width: min(1000px, calc(100vw - 80px));
+    height: min(720px, 86vh);
+  }
+}
+
+/* f-021: About This Mac. */
+.about-mac {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 28px 20px;
+  background: #ececec;
+  color: #1d1d1f;
+  text-align: center;
+}
+.about-mac-avatar,
+.about-mac picture {
+  display: block;
+}
+.about-mac-avatar {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+.about-mac h2 {
+  margin: 16px 0 2px;
+  font-size: 26px;
+  font-weight: 700;
+}
+.about-mac-sub {
+  margin: 0 0 16px;
+  color: #86868b;
+  font-size: 12px;
+}
+.about-mac dl {
+  width: 100%;
+  margin: 0;
+  font-size: 12px;
+}
+.about-mac dl div {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 10px;
+  padding: 3px 0;
+}
+.about-mac dt {
+  text-align: right;
+  font-weight: 600;
+}
+.about-mac dd {
+  margin: 0;
+  color: #3a3a3c;
+  text-align: left;
+}
+.about-mac-stack {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  margin: 16px 0;
+}
+.about-mac-stack span {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 11px;
+}
+.about-mac small {
+  color: #86868b;
+  font-size: 10px;
+}
+@media (min-width: 701px) {
+  .window-shell:has(.about-mac) {
+    width: 340px;
+    height: min(600px, 86vh);
+  }
+}
+@media (max-width: 700px) {
+  .activity-monitor,
+  .freeform-board,
+  .about-mac {
+    padding-top: max(47px, env(safe-area-inset-top));
+  }
+  .am-tabs,
+  .am-row > :nth-child(4) {
+    display: none;
+  }
+  .am-row {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) 50px;
+  }
+  .am-cards {
+    grid-template-columns: 1fr;
+  }
+  .am-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+.menu-apple-button {
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0 6px;
+  margin: 0 -4px 0 -6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+}
+.menu-apple-button:hover,
+.menu-apple-button:focus-visible {
+  outline: none;
+  background: rgba(255, 255, 255, 0.2);
+}

@@ -280,13 +280,14 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
 
 ## f-021 — Activity Monitor, Freeform, About This Mac
 
-- Estado: backlog · Prioridad: P2
+- Estado: review · Prioridad: P2
 - Depende de: f-013
 - AC:
-  - [ ] Activity Monitor muestra `METRICS_DATA` (scores, facts, "Try it yourself") con estilo de gráficas de Activity Monitor
-  - [ ] Freeform muestra `architectures.data.ts` en un tablero
-  - [ ] About This Mac (menú Apple) lista el stack de `technologies.data.ts`
-  - [ ] Gates de f-013
+  - [x] Activity Monitor muestra `METRICS_DATA` (scores, facts, "Try it yourself") con estilo de gráficas de Activity Monitor
+  - [x] Freeform muestra `architectures.data.ts` en un tablero
+  - [x] About This Mac (menú Apple) lista el stack de `technologies.data.ts`
+  - [x] Gates de f-013
+- Notas: `components/os/system-apps.tsx`. Activity Monitor y Freeform van al Dock tras Terminal. About This Mac se abre al pulsar el logo de Apple de la menu bar. "Try it yourself" abre PageSpeed Insights con la URL del sitio (`trackExternalClick`). Los años de experiencia se cuentan desde 2018 ("8 years" del intro), también en el `neofetch` de f-020.
 
 ## f-022 — System Settings + Control Center
 

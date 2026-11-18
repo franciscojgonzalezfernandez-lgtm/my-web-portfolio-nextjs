@@ -71,6 +71,7 @@ import {
 import ProjectDocument from "./project-window";
 import MoviePlayer, { INTRO_MOVIE } from "./movie-window";
 import Terminal, { type TerminalTarget } from "./terminal";
+import { AboutThisMac, ActivityMonitor, FreeformBoard } from "./system-apps";
 import PreviewDocument, {
   certificateDocs,
   certificateLabel,
@@ -115,6 +116,12 @@ const apps = [
   { id: "youtube", name: "YouTube", icon: "/os/doc-icons/youtube.svg" },
   { id: "spotify", name: "Spotify", icon: "/os/doc-icons/spotify.svg" },
   { id: "terminal", name: "Terminal", icon: "/os/doc-icons/terminal.svg" },
+  {
+    id: "activity-monitor",
+    name: "Activity Monitor",
+    icon: "/os/doc-icons/activity-monitor.svg",
+  },
+  { id: "freeform", name: "Freeform", icon: "/os/doc-icons/freeform.svg" },
   { id: "weather", name: "Weather", icon: "/os/doc-icons/weather.svg" },
   { id: "chatgpt", name: "ChatGPT", icon: "/os/doc-icons/chatgpt.svg" },
   {
@@ -157,6 +164,7 @@ type WindowState =
   | { kind: "preview"; doc: PreviewDoc }
   | { kind: "movie" }
   | { kind: "terminal" }
+  | { kind: "about-mac" }
   | { kind: "video" }
   | { kind: "spotify" }
   | { kind: "youtube" }
@@ -191,6 +199,7 @@ const windowKey = (content: WindowState) => {
   if (content.kind === "project") return `project:${content.slug}`;
   if (content.kind === "movie") return "movie";
   if (content.kind === "terminal") return "terminal";
+  if (content.kind === "about-mac") return "about-mac";
   if (content.kind === "preview")
     return content.doc.kind === "cv" ? "preview:cv" : `preview:cert:${content.doc.id}`;
   if (content.kind === "image") return `image:${content.memeId}`;
@@ -1261,6 +1270,8 @@ const ICON_PLATE: Record<AppId, number> = {
   linkedin: 1,
   github: 1,
   terminal: 1,
+  "activity-monitor": 1,
+  freeform: 1,
   trash: 862 / 1024,
 };
 
@@ -1579,6 +1590,20 @@ function AppWindow({
   onClose,
   ...stackProps
 }: { app: WindowAppId; onClose: () => void } & WindowStackProps) {
+  if (app === "activity-monitor") {
+    return (
+      <WindowShell title="Activity Monitor" onClose={onClose} {...stackProps}>
+        <ActivityMonitor />
+      </WindowShell>
+    );
+  }
+  if (app === "freeform") {
+    return (
+      <WindowShell title="Freeform" onClose={onClose} {...stackProps}>
+        <FreeformBoard />
+      </WindowShell>
+    );
+  }
   if (app === "photos") {
     return (
       <WindowShell title="Photos" onClose={onClose} {...stackProps}>
@@ -6389,6 +6414,9 @@ const describeMinimizedWindow = (item: OpenWindow): MinimizedWindowTile => {
       variant: "paper",
     };
   }
+  if (content.kind === "about-mac") {
+    return { id, label: "About This Mac", variant: "paper" };
+  }
   if (content.kind === "terminal") {
     return { id, label: "Terminal", icon: "/os/doc-icons/terminal.svg", variant: "dark" };
   }
@@ -7002,9 +7030,17 @@ export default function Home() {
 
       <div className="menu-bar desktop-only">
         <div>
-          <svg className="menu-apple" viewBox="0 0 24 24" aria-label="Apple menu" role="img">
+          <button
+            type="button"
+            className="menu-apple-button"
+            aria-label="About This Mac"
+            title="About This Mac"
+            onClick={() => addWindow({ kind: "about-mac" })}
+          >
+          <svg className="menu-apple" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.76 3.08.82 1.18-.24 2.31-.94 3.57-.85 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.08l.01-.01ZM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3c.29 2.58-2.34 4.5-3.74 4.25Z" />
           </svg>
+          </button>
           <b>Javi</b>
           <span>File</span>
           <span>Edit</span>
@@ -7281,6 +7317,12 @@ export default function Home() {
               onOpenPreview={openPreview}
               {...stackProps}
             />
+          );
+        if (window.content.kind === "about-mac")
+          return (
+            <WindowShell key={window.id} title="" onClose={onClose} {...stackProps}>
+              <AboutThisMac />
+            </WindowShell>
           );
         if (window.content.kind === "terminal")
           return (
