@@ -141,7 +141,7 @@ export function AboutThisMac() {
   const years = new Date().getFullYear() - 2018;
   const specs: Array<[string, string]> = isGerman
     ? [
-        ["Chip", "TypeScript · React · Next.js"],
+        ["Chip", "TypeScript · Java · React · Next.js"],
         ["Speicher", `${years}+ Jahre Erfahrung`],
         ["Startvolume", `${projects.length} Projekte`],
         ["Seriennummer", `${experiences.length} Stationen`],
@@ -149,7 +149,7 @@ export function AboutThisMac() {
         ["macOS", "JaviOS 26"],
       ]
     : [
-        ["Chip", "TypeScript · React · Next.js"],
+        ["Chip", "TypeScript · Java · React · Next.js"],
         ["Memory", `${years}+ years of experience`],
         ["Startup disk", `${projects.length} projects`],
         ["Serial number", `${experiences.length} roles`],

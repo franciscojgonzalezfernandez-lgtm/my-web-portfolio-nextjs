@@ -3732,6 +3732,9 @@ body {
     flex: 0 0 100%;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    /* Rows must be tall enough that a 2x2 widget (square, half the page
+       width) never spills into the next row of icons. */
+    grid-auto-rows: minmax(calc((100vw - 24px) / 4 - 11px), auto);
     align-content: start;
     justify-items: center;
     row-gap: 22px;
@@ -3749,8 +3752,8 @@ body {
   }
   .mobile-home-dots button {
     display: grid;
-    width: 16px;
-    height: 16px;
+    width: 24px;
+    height: 24px;
     padding: 0;
     border: 0;
     place-items: center;
