@@ -1,4 +1,5 @@
 import Desktop from "@/components/os/desktop";
+import RouteContent from "@/components/seo/route-content";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -27,5 +28,10 @@ export const metadata: Metadata = {
 
 // Contact is the Mail app on the desktop.
 export default function ContactPage() {
-  return <Desktop open={{ kind: "app", app: "mail" }} />;
+  return (
+    <>
+      <Desktop open={{ kind: "app", app: "mail" }} />
+      <RouteContent route="contact" />
+    </>
+  );
 }

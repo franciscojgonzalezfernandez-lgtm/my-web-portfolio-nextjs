@@ -1,4 +1,5 @@
 import Desktop from "@/components/os/desktop";
+import RouteContent from "@/components/seo/route-content";
 import { notFound } from "next/navigation";
 import { projects } from "@/data/projects.data";
 
@@ -74,5 +75,10 @@ export default async function ProjectDetailPage({
   if (!projects.some((project) => project.slug === slug)) {
     notFound();
   }
-  return <Desktop open={{ kind: "project", slug }} />;
+  return (
+    <>
+      <Desktop open={{ kind: "project", slug }} />
+      <RouteContent route="project" slug={slug} />
+    </>
+  );
 }

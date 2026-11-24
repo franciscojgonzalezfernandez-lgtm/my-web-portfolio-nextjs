@@ -1,4 +1,5 @@
 import Desktop from "@/components/os/desktop";
+import RouteContent from "@/components/seo/route-content";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -39,5 +40,10 @@ export const metadata: Metadata = {
 
 // Metrics are shown in Activity Monitor.
 export default function MetricsPage() {
-  return <Desktop open={{ kind: "app", app: "activity-monitor" }} />;
+  return (
+    <>
+      <Desktop open={{ kind: "app", app: "activity-monitor" }} />
+      <RouteContent route="metrics" />
+    </>
+  );
 }

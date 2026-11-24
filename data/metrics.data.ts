@@ -43,3 +43,35 @@ export const METRICS_DATA = {
     "Nimm nicht nur mein Wort dafür. Führe einen Lighthouse-Test auf dieser Website durch und sieh dir die Ergebnisse selbst an.",
   tryYourselfSubtitleSpanish: "No te fíes solo de mi palabra. Lanza una auditoría de Lighthouse sobre esta misma web y comprueba los resultados con tus propios ojos.",
 };
+
+// Lighthouse scores shown in Activity Monitor and in the crawlable /metrics copy.
+export const LIGHTHOUSE: ReadonlyArray<{
+  name: string;
+  nameGerman: string;
+  nameSpanish: string;
+  score: number;
+  pid: number;
+}> = [
+  {
+    name: "Performance",
+    nameGerman: "Leistung",
+    nameSpanish: "Rendimiento",
+    score: 100,
+    pid: 101,
+  },
+  {
+    name: "Accessibility",
+    nameGerman: "Barrierefreiheit",
+    nameSpanish: "Accesibilidad",
+    score: 100,
+    pid: 102,
+  },
+  {
+    name: "Best Practices",
+    nameGerman: "Best Practices",
+    nameSpanish: "Buenas prácticas",
+    score: 100,
+    pid: 103,
+  },
+  { name: "SEO", nameGerman: "SEO", nameSpanish: "SEO", score: 100, pid: 104 },
+];

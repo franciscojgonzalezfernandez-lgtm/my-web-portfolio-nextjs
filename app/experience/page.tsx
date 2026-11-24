@@ -1,4 +1,5 @@
 import Desktop from "@/components/os/desktop";
+import RouteContent from "@/components/seo/route-content";
 import { FIRST_EXPERIENCE_NOTE_ID } from "@/components/os/notes-data";
 import { Metadata } from "next";
 
@@ -40,5 +41,10 @@ export const metadata: Metadata = {
 
 // Experience lives in Notes, one note per job.
 export default function ExperiencePage() {
-  return <Desktop open={{ kind: "notes", noteId: FIRST_EXPERIENCE_NOTE_ID }} />;
+  return (
+    <>
+      <Desktop open={{ kind: "notes", noteId: FIRST_EXPERIENCE_NOTE_ID }} />
+      <RouteContent route="experience" />
+    </>
+  );
 }

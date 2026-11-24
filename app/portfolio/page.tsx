@@ -1,4 +1,5 @@
 import Desktop from "@/components/os/desktop";
+import RouteContent from "@/components/seo/route-content";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -39,5 +40,10 @@ export const metadata: Metadata = {
 
 // The portfolio is the Projects folder in Finder.
 export default function PortfolioPage() {
-  return <Desktop open={{ kind: "folder", folder: "projects" }} />;
+  return (
+    <>
+      <Desktop open={{ kind: "folder", folder: "projects" }} />
+      <RouteContent route="portfolio" />
+    </>
+  );
 }
