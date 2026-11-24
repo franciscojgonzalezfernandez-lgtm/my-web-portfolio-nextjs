@@ -418,3 +418,13 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
   - [x] El escritorio no cambia visualmente (desktop y móvil), sin errores de hidratación ni scroll horizontal
   - [x] `tsc`, `lint`, `build`
 - Notas: detectado en la auditoría SEO de 2026-11-23 (Ahrefs + HTML en vivo). Desde el cutover (f-024) las 16 URLs servían el mismo shell de ~125 palabras ("Ablage Bearbeiten … meme.jpg … Nicht öffnen"), 4 enlaces por página y el mismo `<h1>`: contenido duplicado/fino para Google y Ahrefs, que no ejecutan las ventanas del cliente. Ahrefs además marcaba `/portfolio/ride-flumserberg` con 0 enlaces internos. Solución: `components/seo/route-content.tsx` (server component, `sr-only`, mismo contenido que muestran las ventanas, sacado de `buildNoteFolders("english")`, `projects` y `METRICS_DATA`). Tras el deploy: reenviar el sitemap en Search Console.
+
+## f-032 — `/portfolio/full-stack-calendar` devuelve 404 y aún tiene un backlink
+
+- Estado: review · Prioridad: P3
+- Depende de: f-031
+- AC:
+  - [x] `out/portfolio/full-stack-calendar.html` existe: stub estático con `meta refresh` a `/portfolio`, `canonical` a `/portfolio` y `noindex, follow`
+  - [x] El proyecto sigue oculto: ni card, ni sitemap, ni `generateStaticParams` (f-001 intacto salvo este stub)
+  - [x] `build` verde; la URL redirige a la carpeta Projects en el navegador
+- Notas: detectado en la auditoría SEO de 2026-11-23: Ahrefs ve el 404 con 1 backlink externo. GitHub Pages no admite redirecciones 301 de servidor, así que la redirección es un `meta refresh` desde `public/`. Matiza el AC de f-001 "sin página `/portfolio/full-stack-calendar` en `out/`": no hay página del proyecto, solo la redirección.
