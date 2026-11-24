@@ -1,7 +1,7 @@
 "use client";
 
 import { architectures } from "@/data/architectures.data";
-import { METRICS_DATA } from "@/data/metrics.data";
+import { LIGHTHOUSE, METRICS_DATA } from "@/data/metrics.data";
 import { technologies } from "@/data/technologies.data";
 import { experiences } from "@/data/experiences.data";
 import { projects } from "@/data/projects.data";
@@ -13,36 +13,6 @@ import { CustomImage } from "@/components/high-order-components/CustomImage";
 const SITE_URL = "https://javier-gonzalez-portfolio.com";
 const PAGESPEED_URL = `https://pagespeed.web.dev/analysis?url=${encodeURIComponent(SITE_URL)}`;
 
-const LIGHTHOUSE: ReadonlyArray<{
-  name: string;
-  nameGerman: string;
-  nameSpanish: string;
-  score: number;
-  pid: number;
-}> = [
-  {
-    name: "Performance",
-    nameGerman: "Leistung",
-    nameSpanish: "Rendimiento",
-    score: 100,
-    pid: 101,
-  },
-  {
-    name: "Accessibility",
-    nameGerman: "Barrierefreiheit",
-    nameSpanish: "Accesibilidad",
-    score: 100,
-    pid: 102,
-  },
-  {
-    name: "Best Practices",
-    nameGerman: "Best Practices",
-    nameSpanish: "Buenas prácticas",
-    score: 100,
-    pid: 103,
-  },
-  { name: "SEO", nameGerman: "SEO", nameSpanish: "SEO", score: 100, pid: 104 },
-];
 
 const FACTS = [
   {

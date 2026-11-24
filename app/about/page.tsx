@@ -1,4 +1,5 @@
 import Desktop from "@/components/os/desktop";
+import RouteContent from "@/components/seo/route-content";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -39,5 +40,10 @@ export const metadata: Metadata = {
 
 // The About section lives in Notes on the desktop.
 export default function AboutPage() {
-  return <Desktop open={{ kind: "notes", noteId: "professional" }} />;
+  return (
+    <>
+      <Desktop open={{ kind: "notes", noteId: "professional" }} />
+      <RouteContent route="about" />
+    </>
+  );
 }

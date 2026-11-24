@@ -7279,10 +7279,7 @@ export default function Home({ open }: { open?: DeepLinkTarget } = {}) {
           setSelected(null);
       }}
     >
-      <h1 className="sr-only">
-        Javi — Full-Stack Software Engineer
-      </h1>
-
+      {/* The route's <h1> and crawlable content live in components/seo/route-content.tsx. */}
       <div className="menu-bar desktop-only">
         <div>
           <button

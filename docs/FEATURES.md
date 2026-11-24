@@ -407,3 +407,14 @@ Dock: Finder, Notes, Photos, Mail, YouTube, Spotify, Terminal, Activity Monitor,
   - [x] `/portfolio/ride-flumserberg` generado en `out/` y en `sitemap.xml`
   - [x] `tsc`, `lint`, `build` y navegador (EN/DE/ES)
 - Notas: el vídeo del proyecto queda pendiente (owner); cuando exista va en `videoUrl`.
+
+## f-031 — Cada ruta sirve su propio contenido en el HTML estático
+
+- Estado: review · Prioridad: P0
+- AC:
+  - [x] Cada ruta del sitemap (`/`, `/about`, `/experience`, `/portfolio`, `/contact`, `/metrics`, `/portfolio/<slug>`) lleva en `out/**` su propio `<h1>`, el texto real de esa sección/proyecto y enlaces `<a href>` rastreables a todas las secciones y proyectos
+  - [x] Un único `<h1>` por página: el `sr-only` genérico de `desktop.tsx` desaparece
+  - [x] El contenido va en inglés (coincide con `<title>`, description y canonical) con `lang="en"`
+  - [x] El escritorio no cambia visualmente (desktop y móvil), sin errores de hidratación ni scroll horizontal
+  - [x] `tsc`, `lint`, `build`
+- Notas: detectado en la auditoría SEO de 2026-11-23 (Ahrefs + HTML en vivo). Desde el cutover (f-024) las 16 URLs servían el mismo shell de ~125 palabras ("Ablage Bearbeiten … meme.jpg … Nicht öffnen"), 4 enlaces por página y el mismo `<h1>`: contenido duplicado/fino para Google y Ahrefs, que no ejecutan las ventanas del cliente. Ahrefs además marcaba `/portfolio/ride-flumserberg` con 0 enlaces internos. Solución: `components/seo/route-content.tsx` (server component, `sr-only`, mismo contenido que muestran las ventanas, sacado de `buildNoteFolders("english")`, `projects` y `METRICS_DATA`). Tras el deploy: reenviar el sitemap en Search Console.
